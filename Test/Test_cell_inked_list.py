@@ -43,8 +43,8 @@ for i in range (0, _no_cells) :
 primary_state = primary_state [1:, :]
 
 # use CellLinked to generate a head array and a list array of all particles.
-initial_parameter = CellLinked(box_len = 3 , r_cut=1)
-head_arr, list_arr = initial_parameter (primary_state)
+initial_parameter = CellLinked(3 , 1 , primary_state)
+head_arr, list_arr = initial_parameter ()
 
 assert len (head_arr) == _no_cells*_no_cells*_no_cells , "the length of head array is not equal to number of total cells"
 assert max (head_arr) == len (list_arr)-1, "The maximum number in head array is not equal to the length of list array"
@@ -74,8 +74,8 @@ To test the _find_neighbor_cells function, consider a cube with 27 cells.
 if cell index == 13, all cells in this cube are neighbor.
 """
 # Compute the head and list array using simulation box length, cut-off radius, and the position state
-position = CellLinked (box_len=3,  r_cut=1)
-head_arr, list_arr = position (primary_state )
+position = CellLinked (3, 1, primary_state )
+head_arr, list_arr = position ()
 
 # calculate neighbor cells based on head array
 neighbor_cells = position._find_neighbor_cells(head_arr)
@@ -97,8 +97,8 @@ r_cut= 1
 postate = box_len * np.random.random_sample((50, 3))
 
 # Compute head array and list array
-model = CellLinked (box_len,  r_cut)
-head_arr, list_arr = model (postate)
+model = CellLinked (box_len,  r_cut, postate)
+head_arr, list_arr = model ()
 
 # calculate neighbor cells based on head array
 neighbor_cells = model._find_neighbor_cells(head_arr)
