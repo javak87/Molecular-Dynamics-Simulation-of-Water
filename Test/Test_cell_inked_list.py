@@ -80,6 +80,7 @@ head_arr, list_arr = position ()
 # calculate neighbor cells based on head array
 neighbor_cells = position._find_neighbor_cells(head_arr)
 
+
 # compare the 13th element of neighbor_cells (cube center) and the result
 result = list(range(0, 27))
 assert neighbor_cells [13] == result , 'neighbor indexes or neighbor cells calculate wrongly'
@@ -100,8 +101,21 @@ postate = box_len * np.random.random_sample((50, 3))
 model = CellLinked (box_len,  r_cut, postate)
 head_arr, list_arr = model ()
 
+######
+cellindex = model._cellindex (postate[3,:])
+print ('cell index is :', cellindex)
+find_neighbor_indexes = model._find_neighbor_index (cellindex)
+print ('find_neighbor_indexes is :', find_neighbor_indexes)
+
+particles = model._find_particles_inside_neighbor_cells (list_arr, head_arr, find_neighbor_indexes)
+print ('particles', particles)
+
+#########
+
+
 # calculate neighbor cells based on head array
 neighbor_cells = model._find_neighbor_cells(head_arr)
+
 
 # Extract neighbor cells of the 13th cells (cell index) which all cells are neighbor of each other
 neighbor_cells = neighbor_cells[13]

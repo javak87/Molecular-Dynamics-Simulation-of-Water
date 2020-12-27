@@ -34,9 +34,10 @@ class CellLinked ():
         # Initialize a list array with -1, size = the total number of particles
         list_arr = [-1] * self.postate.shape[0]
 
-        print (self.postate[1,:])
+        print (list_arr)
 
         for i in range (0, self.postate.shape[0]) :
+            print (i)
 
             # calculate cell index of each particles based on the particle position
             index = self._cellindex (self.postate[i,:])
@@ -151,21 +152,26 @@ class CellLinked ():
 
 
 
-#if __name__=="__main__":
+if __name__=="__main__":
 
-#    box_len=3
-#    r_cut= 1
-#    postate = box_len * np.random.random_sample((10, 3))
-#    model = CellLinked (box_len,  r_cut, postate)
-#    head_arr, list_arr = model ()
-#    neighbor_cells = model._find_neighbor_cells(head_arr)
-#    neighbor_cells = neighbor_cells[13]
-#    temporary_state = model._find_particles_inside_neighbor_cells (list_arr, head_arr, neighbor_cells)
+    box_len=5
+    r_cut= 1
+    postate = box_len * np.random.random_sample((10, 3))
+    print (postate)
+    model = CellLinked (box_len,  r_cut, postate)
+    head_arr, list_arr = model ()
+    print (len(list_arr))
+    print (len(head_arr))
+    neighbor_cells = model._find_neighbor_cells(head_arr)
+    neighbor_cells = neighbor_cells[13]
+    temporary_state = model._find_particles_inside_neighbor_cells (list_arr, head_arr, neighbor_cells)
 
-#    mask = np.isin(postate, temporary_state)
-#    assert np.all(mask == True) == True, 'particles in neighbor cells has been indetified wrongly'
+    print (temporary_state.shape)
+    print (temporary_state)
+    #mask = np.isin(postate, temporary_state)
+    #assert np.all(mask == True) == True, 'particles in neighbor cells has been indetified wrongly'
 
-#    print ("the head array is : \n ", head_arr)
-#    print ("list array is : \n ", list_arr)
+    print ("the head array is : \n ", head_arr)
+    print ("list array is : \n ", list_arr)
 
     
