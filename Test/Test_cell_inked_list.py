@@ -1,136 +1,166 @@
 import numpy as np
-from cell_linked_list import CellLinked
-"""
-This is a test for the "cell_linked_list" file.
-Simulation box : 3*3*3
-The number of cell per each axis : 3 
-In this test, a simulation box is considered to initialize the position state of particles.
-Each of them has been specified to a cell.
-Before testing the CellLinked class, we know the position state of particles and their corresponding cell.
-Firstly,  the primary_state of the particles is initialized.
-Secondly, the head array and the list array are created using the CellLinked class.
-Thirdly, the given head array and the list array have been used to obtain the secondary_state.
-To satisfy all parts of the class,  primary_state  should be equal to secondary_state 
-"""
-# Initilialize the number of cells per each axis
-_no_cells = 3
-cells = []
-primary_state = np.zeros((1,3))
-for i in range (0, _no_cells) :
-    for j in range (0, _no_cells) :
-        for k in range (0, _no_cells) :
-
-            # Initialize particale postion in x direction between i and i+1
-            p0 = np.random.random_sample((np.random.randint(0,5), 1)) + i
-
-            # Initialize particale postion in y direction between j and j+1
-            p1 = np.random.random_sample((p0.shape[0], 1)) + j
-
-            # Initialize particale postion in z direction between k and k+1
-            p2 = np.random.random_sample((p0.shape[0], 1)) + k
-
-            # Unified position of each particle in x, y , and z direction
-            p = np.append(p0, p1, axis=1)
-            p = np.append(p, p2, axis=1)
-
-            # add new particle position to primary_state           
-            primary_state = np.concatenate((primary_state,p))
-
-            # add amount of particles generated in each step
-            cells.append(p0.shape[0])
-
-# omit the zero raw which is generated in the initialization step
-primary_state = primary_state [1:, :]
-
-# use CellLinked to generate a head array and a list array of all particles.
-initial_parameter = CellLinked(3 , 1 , primary_state)
-head_arr, list_arr = initial_parameter ()
-
-assert len (head_arr) == _no_cells*_no_cells*_no_cells , "the length of head array is not equal to number of total cells"
-assert max (head_arr) == len (list_arr)-1, "The maximum number in head array is not equal to the length of list array"
-
-"""
-In the following section, the primary position state of particles, head array, and list array are known.
-Based on the head array and list array, the secondary position state has been obtained.
-If head and list array are computed wrongly, secondary position state is not equal to primary position state.
-"""
-
-secondary_state = np.zeros((1,3))
-for ii in head_arr:
-    if ii > -1 :
-        cell_state = np.zeros((1,3))
-        cell_state = np.concatenate((cell_state, np.array ([primary_state[ii]])))
-        while  list_arr[ii] != -1 :
-            cell_state = np.concatenate((cell_state, np.array ([primary_state[list_arr[ii]]])))
-            ii = list_arr[ii]
-
-        cell_state = np.flip(cell_state[1:, :], 0)
-        secondary_state = np.concatenate((secondary_state, cell_state))
-
-assert (secondary_state[1:, :] == primary_state).all() , 'Linked-list is not connected properly'
-"""
-In this section, neighbor cells are calcualted based on the head array.
-To test the _find_neighbor_cells function, consider a cube with 27 cells.
-if cell index == 13, all cells in this cube are neighbor.
-"""
-# Compute the head and list array using simulation box length, cut-off radius, and the position state
-position = CellLinked (3, 1, primary_state )
-head_arr, list_arr = position ()
-
-# calculate neighbor cells based on head array
-neighbor_cells = position._find_neighbor_cells(head_arr)
+from cell_linked_list import CellLinked, CellLinkedPeriodic
+from scipy.spatial import distance
 
 
-# compare the 13th element of neighbor_cells (cube center) and the result
-result = list(range(0, 27))
-assert neighbor_cells [13] == result , 'neighbor indexes or neighbor cells calculate wrongly'
+def test_linked_cell_nonperiodic():
 
-"""
-In this section, particles in each cell and neighbor cells are identified. 
-Consider a cube with 27 cells, if cell index == 13 (cube center), all cells in this cube are neighbor.
-and all particles are neighbors of each other.
-"""
-# Initialize simulation box lenghth and cut-off radius
-box_len=3
-r_cut= 1
+    """
+    This is a test for the "cell_linked_list" file.
+    Simulation box : 3*3*3
+    The number of cell per each axis : 3 
+    In this test, a simulation box is considered to initialize the position state of particles.
+    Each of them has been specified to a cell.
+    Before testing the CellLinked class, we know the position state of particles and their corresponding cell.
+    Firstly,  the primary_state of the particles is initialized.
+    Secondly, the head array and the list array are created using the CellLinked class.
+    Thirdly, the given head array and the list array have been used to obtain the secondary_state.
+    To satisfy all parts of the class,  primary_state  should be equal to secondary_state 
+    """
+    # Initilialize the number of cells per each axis
+    _no_cells = 3
+    cells = []
+    primary_state = np.zeros((1,3))
+    for i in range (0, _no_cells) :
+        for j in range (0, _no_cells) :
+            for k in range (0, _no_cells) :
 
-# Initialize postions of particles inside of the simulation box
-postate = box_len * np.random.random_sample((50, 3))
+                # Initialize particale postion in x direction between i and i+1
+                p0 = np.random.random_sample((np.random.randint(0,5), 1)) + i
 
-# Compute head array and list array
-model = CellLinked (box_len,  r_cut, postate)
-head_arr, list_arr = model ()
+                # Initialize particale postion in y direction between j and j+1
+                p1 = np.random.random_sample((p0.shape[0], 1)) + j
 
-######
-cellindex = model._cellindex (postate[3,:])
-print ('cell index is :', cellindex)
-find_neighbor_indexes = model._find_neighbor_index (cellindex)
-print ('find_neighbor_indexes is :', find_neighbor_indexes)
+                # Initialize particale postion in z direction between k and k+1
+                p2 = np.random.random_sample((p0.shape[0], 1)) + k
 
-particles = model._find_particles_inside_neighbor_cells (list_arr, head_arr, find_neighbor_indexes)
-print ('particles', particles)
+                # Unified position of each particle in x, y , and z direction
+                p = np.append(p0, p1, axis=1)
+                p = np.append(p, p2, axis=1)
 
-#########
+                # add new particle position to primary_state           
+                primary_state = np.concatenate((primary_state,p))
+
+                # add amount of particles generated in each step
+                cells.append(p0.shape[0])
+
+    # omit the zero raw which is generated in the initialization step
+    primary_state = primary_state [1:, :]
+
+    # use CellLinked to generate a head array and a list array of all particles.
+    initial_parameter = CellLinked(3 , 1 , primary_state)
+    head_arr, list_arr = initial_parameter ()
+
+    assert len (head_arr) == _no_cells*_no_cells*_no_cells , "the length of head array is not equal to number of total cells"
+    assert max (head_arr) == len (list_arr)-1, "The maximum number in head array is not equal to the length of list array"
+
+    """
+    In the following section, the primary position state of particles, head array, and list array are known.
+    Based on the head array and list array, the secondary position state has been obtained.
+    If head and list array are computed wrongly, secondary position state is not equal to primary position state.
+    """
+
+    secondary_state = np.zeros((1,3))
+    for ii in head_arr:
+        if ii > -1 :
+            cell_state = np.zeros((1,3))
+            cell_state = np.concatenate((cell_state, np.array ([primary_state[ii]])))
+            while  list_arr[ii] != -1 :
+                cell_state = np.concatenate((cell_state, np.array ([primary_state[list_arr[ii]]])))
+                ii = list_arr[ii]
+
+            cell_state = np.flip(cell_state[1:, :], 0)
+            secondary_state = np.concatenate((secondary_state, cell_state))
+
+    assert (secondary_state[1:, :] == primary_state).all() , 'Linked-list is not connected properly'
+    """
+    In this section, neighbor cells are calcualted based on the head array.
+    To test the _find_neighbor_cells function, consider a cube with 27 cells.
+    if cell index == 13, all cells in this cube are neighbor.
+    """
+    # Compute the head and list array using simulation box length, cut-off radius, and the position state
+    position = CellLinked (3, 1, primary_state )
+    head_arr, list_arr = position ()
+
+    # calculate neighbor cells based on head array
+    neighbor_cells = position._find_neighbor_cells(head_arr)
 
 
-# calculate neighbor cells based on head array
-neighbor_cells = model._find_neighbor_cells(head_arr)
+    # compare the 13th element of neighbor_cells (cube center) and the result
+    result = list(range(0, 27))
+    assert neighbor_cells [13] == result , 'neighbor indexes or neighbor cells calculate wrongly'
+
+    """
+    In this section, particles in each cell and neighbor cells are identified. 
+    Consider a cube with 27 cells, if cell index == 13 (cube center), all cells in this cube are neighbor.
+    and all particles are neighbors of each other.
+    """
+    # Initialize simulation box lenghth and cut-off radius
+    box_len=3
+    r_cut= 1
+
+    # Initialize postions of particles inside of the simulation box
+    postate = box_len * np.random.random_sample((50, 3))
+
+    # Compute head array and list array
+    model = CellLinked (box_len,  r_cut, postate)
+    head_arr, list_arr = model ()
+
+    # calculate neighbor cells based on head array
+    neighbor_cells = model._find_neighbor_cells(head_arr)
+
+    # Extract neighbor cells of the 13th cells (cell index) which all cells are neighbor of each other
+    neighbor_cells = neighbor_cells[13]
+
+    # Extract all particles positioned in the 13th cell and other neighbor cells
+    temporary_state = model._find_particles_inside_neighbor_cells (list_arr, head_arr, neighbor_cells)
+
+    # Check all particles which are calculate by "_find_particles_inside_neighbor_cells" function
+    mask = np.isin(postate, temporary_state)
+    assert np.all(mask == True) == True, 'particles in neighbor cells has been indetified wrongly'
 
 
-# Extract neighbor cells of the 13th cells (cell index) which all cells are neighbor of each other
-neighbor_cells = neighbor_cells[13]
 
-# Extract all particles positioned in the 13th cell and other neighbor cells
-temporary_state = model._find_particles_inside_neighbor_cells (list_arr, head_arr, neighbor_cells)
+def test_linked_cell_periodic():
 
-# Check all particles which are calculate by "_find_particles_inside_neighbor_cells" function
-mask = np.isin(postate, temporary_state)
-assert np.all(mask == True) == True, 'particles in neighbor cells has been indetified wrongly'
+    """
+    In this section, CellLinkedPeriodic is tested.
+    particles in each cell and neighbor cells are identified in periodic boundary condition.
+    Here, a cube with an origin in the cube center is considered.
+    While distance evaluation, this cube act as a periodic boundary condition.
 
-print ('\n')
-print ('--------------------------------------------------')
-print ('the CellLinked class is verified by the given test')
-print ('--------------------------------------------------')
+    """
+    # Simulation box length
+    box_len=3
+
+    # cut of radius
+    r_cut= 1
+
+    # create a state between [-box_len/2, box_len/2]
+    primary_state = box_len*np.random.sample((10,3)) - box_len/2
+
+    # determine the target position for distance evaluation
+    target_position = np.array([0, 0, 0])
+
+    # compute euclidean distance beween states and target position
+    dists = distance.cdist(primary_state, target_position.reshape(1,3), 'euclidean')
+
+    # extract states that the distance between target position is less than cut of radius
+    effective_state = primary_state[np.where(dists<r_cut)[0]]
+
+    # using CellLinkedPeriodic to extract particles that they are neighbors in periodic system
+    model = CellLinkedPeriodic(box_len, r_cut, primary_state, target_position)
+    particles_inside_neighbor_cells = model._find_particles_inside_neighbor_cells()
+
+    assert np.all(np.isin(effective_state, particles_inside_neighbor_cells)) == True, 'Boundary is not Periodic '
+
+
+if __name__=="__main__":
+    test_linked_cell_nonperiodic()
+    test_linked_cell_periodic()
+
+
+
 
 
 

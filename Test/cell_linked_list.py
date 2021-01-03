@@ -1,5 +1,8 @@
 import numpy as np
 import math
+from scipy.spatial import distance
+from periodic_kdtree import PeriodicCKDTree
+from pandas.core.common import flatten
 
 class CellLinked ():
 
@@ -18,6 +21,12 @@ class CellLinked ():
         self.no_cells = math.floor (self.box_len/self.r_cut)
         self.postate = postate
 
+        # Initialize a Head array with -1, size = the total number of cells
+        self.head_arr = [-1] * self.no_cells*self.no_cells*self.no_cells
+
+        # Initialize a list array with -1, size = the total number of particles
+        self.list_arr = [-1] * self.postate.shape[0]
+
     def __call__ (self) -> tuple:
 
         """ 
@@ -28,27 +37,19 @@ class CellLinked ():
                 list_arr (list):   list array in the linked list (list_arr.shape==number of particles)
         """
 
-        # Initialize a Head array with -1, size = the total number of cells
-        head_arr = [-1] * self.no_cells*self.no_cells*self.no_cells
-
-        # Initialize a list array with -1, size = the total number of particles
-        list_arr = [-1] * self.postate.shape[0]
-
-        print (list_arr)
 
         for i in range (0, self.postate.shape[0]) :
-            print (i)
 
             # calculate cell index of each particles based on the particle position
             index = self._cellindex (self.postate[i,:])
 
             # calculate list array
-            list_arr [i] = head_arr [index]
+            self.list_arr [i] = self.head_arr [index]
 
             # calculate head array         
-            head_arr [index] = i
+            self.head_arr [index] = i
 
-        return head_arr, list_arr
+        return self.head_arr, self.list_arr
 
 
             
@@ -121,7 +122,7 @@ class CellLinked ():
     def _find_particles_inside_neighbor_cells (self, list_arr : list, head_arr : list, neighbor_cell_indexes : list) -> np.ndarray:
     
         """
-        find particles in each cell and neighbor cells are identified
+        find particles in each cell and neighbor cells which are identified
             Parameters :
                 list_arr (list) : list array
                 head_arr (list) : head array
@@ -151,27 +152,94 @@ class CellLinked ():
 
 
 
+class CellLinkedPeriodic ():
+
+    def __init__ (self, box_len: float, r_cut: float, postate : np.ndarray, target_position: np.ndarray) :
+
+        self.box_len = box_len
+        self.r_cut = r_cut
+        self.postate = postate
+        self.target_position = target_position
+
+    def __call__ (self) :
+
+        return self._find_particles_inside_neighbor_cells()
+        
+    
+    def _find_particles_inside_neighbor_cells (self) -> np.ndarray:
+         
+        bounds = np.array([self.box_len, self.box_len, self.box_len])
+
+        # Build kd-tree
+        tree = PeriodicCKDTree(bounds, self.postate)
+
+        # Find neighbors within a fixed distance of a point
+        neighbors = tree.query_ball_point(self.target_position, r=self.r_cut)
+
+        new_state = np.take(self.postate, neighbors, axis=0)
+        
+        return new_state
+
+         
+
+class FindParticleDistance () :
+
+    def __init__ (self, target_particle : np.ndarray, temporary_state : np.ndarray, r_cut: float) :
+
+        self.target_particle = target_particle
+        self.temporary_state = temporary_state
+        self.r_cut = r_cut
+
+    def __call__ (self) :
+
+        return self._find_particles_distance_inside_neighbor_cells() 
+    
+    def _find_particles_distance_inside_neighbor_cells(self) :
+
+        '''
+
+        '''
+        dists = distance.cdist(self.temporary_state, self.target_particle.reshape(1,3), 'euclidean')
+        a = dists < self.r_cut
+        true_state = self.temporary_state[a[:, 0]]
+        return true_state
+
+
+
 
 if __name__=="__main__":
 
-    box_len=5
+    box_len=3
     r_cut= 1
-    postate = box_len * np.random.random_sample((10, 3))
+    postate = box_len * np.random.random_sample((20, 3))
     print (postate)
-    model = CellLinked (box_len,  r_cut, postate)
-    head_arr, list_arr = model ()
-    print (len(list_arr))
-    print (len(head_arr))
-    neighbor_cells = model._find_neighbor_cells(head_arr)
-    neighbor_cells = neighbor_cells[13]
-    temporary_state = model._find_particles_inside_neighbor_cells (list_arr, head_arr, neighbor_cells)
 
-    print (temporary_state.shape)
-    print (temporary_state)
+    effective_state = CellLinkedPeriodic (box_len, r_cut, postate, postate[1,:])
+    print (effective_state)
+
+    #target_particle = np.array([0, 0, 0]).reshape(1,3)
+    #model = FindParticleDistance (target_particle, postate, 1.5)
+    #result = model._find_particles_distance_inside_neighbor_cells()
+    #print (result)
+    #head_arr, list_arr = model ()
+    #periodic_neighbor_index = model._find_neighbor_cells ()
+    #print (periodic_neighbor_index)
+
+
+
+
+    #print (len(list_arr))
+    #print (len(head_arr))
+    #neighbor_cells = model._find_neighbor_cells(head_arr)
+    #neighbor_cells = neighbor_cells[13]
+    #temporary_state = model._find_particles_inside_neighbor_cells (list_arr, head_arr, neighbor_cells)
+
+    #print (temporary_state.shape)
+    #print (temporary_state)
     #mask = np.isin(postate, temporary_state)
     #assert np.all(mask == True) == True, 'particles in neighbor cells has been indetified wrongly'
 
-    print ("the head array is : \n ", head_arr)
-    print ("list array is : \n ", list_arr)
+    #print ("the head array is : \n ", head_arr)
+    #print ("list array is : \n ", list_arr)
 
     
