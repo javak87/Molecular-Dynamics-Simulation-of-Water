@@ -1,90 +1,51 @@
 import numpy as np
+from lennard_jones import LennardJones
+from numpy.linalg import inv
 
-class Integrator():
+class Integrator :
 
-    def __init__ (self, dim, particles, mass, force, pos, vel, acc, dt,) :
-        
-        self.dim = dim
-        self.particles = particles
-        self.mass = mass
-        self.pos = pos
-        self.vel = vel
-        self.acc = acc
-        self.dt =dt
+    def __init__ (self, posate: np.ndarray, velocity: np.ndarray, force: np.ndarray, timespan: tuple, mass: np.ndarray) :
+
+        '''
+        Parameters
+        ----------
+        postate: np.ndarray
+                 Positions for each particle
+        velocity: np.ndarray
+                 Velocities for each particle
+        force: np.ndarray
+                 Forces for each particle
+        timespan: tuple
+                 Step time indicator
+        mass: np.ndarray
+                 Particle mass
+        '''
+
+        self.posate = posate
+        self.velocity = velocity
         self.force = force
-        
-    def update_pos(self,dim, particles ,pos, vel, acc, dt):
-        """
-        Update the particle positions.
-        
-        Parameters
-        ----------
-        dim: 
-            Spatial dimension
-        particles:
-            Particle number
-        pos:
-            The positions of the particles
-        vel:
-            The velocities of the particles
-        acc:
-            The accelerations of the particles
-        dt: float
-            The timestep length
-        """
-       
-        for i in range ( 0, dim ):
-            for j in range ( 0, particles ):
-                pos[i,j] = pos[i,j] + vel[i,j] * dt + 0.5 * acc[i,j] * dt * dt
-        return pos
+        self. timespan =  timespan
+        self.mass = mass
 
-    def update_vel(self, dim, particles, mass, force, vel, acc, dt):
-        
-        #define reverse mass to make faster calculation (multiplication is faster than division)
-        rev_mass = 1/mass
 
-        """
-        Update the particle velocities.
-        
-        Parameters
-        ----------
-        dim: 
-            Spatial dimension
-        particles:
-            Particle number
-        vel:
-            The velocities of the particles
-        acc:
-            The accelerations of the particles
-        force:
-            Force acting on particles
-        dt: 
-            The timestep length
-        """
-        for i in range ( 0, dim ):
-            for j in range ( 0, particles ):
-                vel[i,j] = vel[i,j] + 0.5 * dt * ( force[i,j] / rev_mass + acc[i,j] )
-        
-        return vel
+    def __call__ (self, box_len: float, sigma: float, epsilon: float, compmethod: str, r_cut: float) :
 
-    def update_acc(self, dim, particles, mass, force, acc, dt):
-        #define reverse mass to make faster calculation (multiplication is faster than division)
-        rev_mass = 1/mass
-        """
-        Update the particle velocities.
+        return self.velocityverlet(box_len, sigma, epsilon, compmethod, r_cut)
+
+
+    def velocityverlet (self, box_len: float, sigma: float, epsilon: float, compmethod: str, r_cut: float) :
         
-        Parameters
-        ----------
-        dim: 
-            Spatial dimension
-        particles:
-            Particle number
-        acc:
-            The accelerations of the particles
-        dt: 
-            The timestep length
-        """
-        for i in range ( 0, dim):
-            for j in range ( 0, particles):
-                acc[i,j] = force[i,j] * rev_mass
-        return acc
+        # calculate half step momenta
+        momenta_half_step = self.mass * self.velocity + (self.force * (self.timespan[1] - self.timespan[0]) / 2)
+        position_full_step = self.posate + (self.timespan[1] - self.timespan[0]) * ( inv(self.mass) ) * momenta_half_step
+
+        # calculate Lennard jones force
+        force_object = LennardJones(position_full_step, box_len)
+        lj_force = force_object (sigma, epsilon, compmethod,r_cut)
+
+        momenta_full_step = momenta_half_step + ( self.timespan[1] - self.timespan[0] ) * lj_force / 2
+
+        # calculate velocity from momenta
+        velocity_full_step = inv(self.mass)*momenta_full_step
+
+        return position_full_step, velocity_full_step
