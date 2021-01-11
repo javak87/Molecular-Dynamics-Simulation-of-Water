@@ -49,7 +49,7 @@ class LennardJones:
 
         # Make sure that no unsupported keywords were passed for the current compmethod
 
-        assert compmethod == 'Naive' or compmethod == 'Cellink' or compmethod == 'Cellink_PBC', 'computation method is selected wrongly. computation method should be "Normal" or "Cellink" or Cellink_PBC'
+        assert compmethod == 'Naive' or compmethod == 'Cellink' or compmethod == 'Cellink_PBC', 'computation method is selected wrongly. computation method should be "Naive" or "Cellink" or Cellink_PBC'
 
 
         if compmethod == 'Naive' :
