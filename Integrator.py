@@ -27,9 +27,8 @@ class Integrator :
         self. timespan =  timespan
         self.mass = mass
 
-
     def __call__ (self, box_len: float, sigma: float, epsilon: float, compmethod: str, r_cut: float) :
-
+        
         return self.velocityverlet(box_len, sigma, epsilon, compmethod, r_cut)
 
 
