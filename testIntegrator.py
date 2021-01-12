@@ -40,19 +40,19 @@ def integrator_test():
     print(all_velocities)
 
     verlet_cell_linked = Integrator(postate, all_velocities, lj_force_cell_linked, timespan, mass)
-    postate, all_velocities = verlet_cell_linked.velocityverlet
+    postate, all_velocities = verlet_cell_linked.velocityverlet(box_len, sigma, epsilon, "Cellink", r_cut)
 
     print(postate)
     print(all_velocities)
 
     verlet_periodic = Integrator(postate, all_velocities, lj_force_periodic, timespan, mass)
-    postate, all_velocities = verlet_periodic.velocityverlet
+    postate, all_velocities = verlet_periodic.velocityverlet(box_len, sigma, epsilon, "Cellink_PBC", r_cut)
 
     print(postate)
     print(all_velocities)
 
     verlet_naive = Integrator(postate, all_velocities, lj_force_naive, timespan, mass)
-    postate, all_velocities =  verlet_naive.velocityverlet
+    postate, all_velocities =  verlet_naive.velocityverlet(box_len, sigma, epsilon, 'Naive', r_cut)
 
     print(postate)
     print(all_velocities)
