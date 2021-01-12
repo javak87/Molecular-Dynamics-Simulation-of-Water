@@ -45,12 +45,14 @@ def integrator_test():
     print(postate)
     print(all_velocities)
 
-    postate, all_velocities = Integrator(postate, all_velocities, lj_force_periodic, timespan, mass)
+    verlet_periodic = Integrator(postate, all_velocities, lj_force_periodic, timespan, mass)
+    postate, all_velocities = verlet_periodic.velocityverlet
 
     print(postate)
     print(all_velocities)
 
-    postate, all_velocities = Integrator(postate, all_velocities, lj_force_naive, timespan, mass)
+    verlet_naive = Integrator(postate, all_velocities, lj_force_naive, timespan, mass)
+    postate, all_velocities =  verlet_naive.velocityverlet
 
     print(postate)
     print(all_velocities)
