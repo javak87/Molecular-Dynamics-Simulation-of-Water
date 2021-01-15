@@ -146,8 +146,8 @@ if __name__ == "__main__":
 
     mol_count = 1
 
-    FileOperation.save_data(t_steps, t_interval, mol_count, "data.h5")
-    FileOperation.write_hdf5_txt('data.h5')
+    FileOperation.save_data(t_steps, t_interval, mol_count, "data.hdf5")
+    FileOperation.write_hdf5_txt('data.hdf5')
 
     pos_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, mol_count, "data.h5")[0])
     vel_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, mol_count, "data.h5")[1])
