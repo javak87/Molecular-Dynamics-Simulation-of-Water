@@ -4,6 +4,7 @@
 import numpy as np
 import h5py
 import sys
+import math
 
 
 class FileOperation:
@@ -48,8 +49,8 @@ class FileOperation:
                 new_group.create_dataset('Positions', data=r_new)
                 new_group.create_dataset('Velocities', data=v_new)
 
-            r_new = r + i + 1
-            v_new = v + i + 1
+            r_new = r + i * 0.005 * (-1)**i
+            v_new = v + i * 0.001
 
             # ONLY used for generating retraceable data for visualisation;
             # DO NOT USE with actual, calculated data !
@@ -178,4 +179,4 @@ if __name__ == "__main__":
 
     # the same holds true for the vel_array
 
-    print(pos_array[0][:][..., 0])
+    print(len(pos_array[0]))
