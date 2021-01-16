@@ -15,16 +15,18 @@ class FileOperation:
 
         hdf5_file = h5py.File(file_name, 'w')
 
+        r = np.random.rand(atom_count, 3)
+
+        # calculated positions from the integrator; right now just random data
+
+        v = np.random.rand(atom_count, 3)
+
+        # calculated velocities from the integrator; right now just random data
+
         for i in range(0, timesteps + 1):
 
             # the range was chosen so that we have timestep 0 (initial data) to
             # timestep + 1 (data of the last timestep since in range(start, stop) stop is excluded)
-
-            r = np.random.rand(atom_count, 3)
-            # calculated positions from the integrator; right now just random data
-
-            v = np.random.rand(atom_count, 3)
-            # calculated velocities from the integrator; right now just random data
 
             if i == 0:
 
@@ -39,8 +41,14 @@ class FileOperation:
                 # save only the data for every x-th timestep (determined by time_interval)
 
                 new_group = hdf5_file.create_group('Timestep Identifier Number = {0}'.format(i / timesteps))
-                new_group.create_dataset('Positions', data=r)
-                new_group.create_dataset('Velocities', data=v)
+                new_group.create_dataset('Positions', data=r_new)
+                new_group.create_dataset('Velocities', data=v_new)
+
+            r_new = r + i + 1
+            v_new = v + i + 1
+
+            # ONLY used for generating retraceable data for visualisation;
+            # DO NOT USE with actual, calculated data !
 
         hdf5_file.close()
 
@@ -138,24 +146,32 @@ class FileOperation:
 
 if __name__ == "__main__":
 
-    t_steps = 190
-    t_interval = 19
+    t_steps = 100
+    t_interval = 2
 
     # t_steps should be a multiple of t_interval, to include the last calculated data;
     # otherwise there will be unnecessary calculations, where the results won't be saved
 
-    mol_count = 1
+    mol_count = 5
 
     FileOperation.save_data(t_steps, t_interval, mol_count, "data.hdf5")
     FileOperation.write_hdf5_txt('data.hdf5')
 
-    pos_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, mol_count, "data.h5")[0])
-    vel_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, mol_count, "data.h5")[1])
+    pos_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, mol_count, "data.hdf5")[0])
+    vel_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, mol_count, "data.hdf5")[1])
 
     # pos_array[0] gives all atom - positions for the first time step
+
     # pos_array[0][1] gives the position of the second atom ([1]) for the first time step ([0])
+
     # pos_array[0][1][2] gives the z-coordinate ([2]) of the second atom ([1]) of the first time step ([0])
+
+    # more examples with slicing:
+
+    # pos_array[0][:][..., 0] will give all x-coordinates from all atom positions of the first time step
+    # pos_array[0][:][..., 1] will give all y-coordinates from all atom positions of the first time step
+    # pos_array[0][:][..., 2] will give all z-coordinates from all atom positions of the first time step
+
     # the same holds true for the vel_array
 
-    print("Numpy-Array with positions for every {0} timesteps:\n\n{1}\n\n".format(t_interval, pos_array))
-    print("Numpy-Array with velocities for every {0} timesteps:\n\n{1}\n\n".format(t_interval, vel_array))
+    print(pos_array[0][:][..., 0])
