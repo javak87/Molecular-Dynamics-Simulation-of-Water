@@ -8,6 +8,10 @@ import sys
 
 class FileOperation:
 
+    def __init__(self):
+
+        pass
+
     @staticmethod
     def save_data(timesteps: int, time_interval: int, molecule_count: int, file_name: str):
 
