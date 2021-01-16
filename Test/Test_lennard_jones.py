@@ -23,10 +23,10 @@ def apply_lennard_jones () :
     r_cut= 500 # Angstroms
 
     # Compute Lennard Jones with diffrent methods
-    force_object = LennardJones(postate, box_len)
-    lj_force_cell_linked = force_object (sigma, epsilon, 'Cellink',r_cut)
-    lj_force_periodic = force_object (sigma, epsilon, 'Cellink_PBC',r_cut)
-    lj_force_naive = force_object (sigma, epsilon, 'Naive',r_cut)
+    force_object = LennardJones(sigma, epsilon, 'Cellink_PBC', r_cut, box_len)
+    lj_force_cell_linked = force_object (postate)
+    lj_force_periodic = force_object (postate)
+    lj_force_naive = force_object (postate)
 
     # Test Newton's third law
     npt.assert_almost_equal(np.sum(lj_force_cell_linked, axis=0), [1e-20, 1e-20, 1e-20], decimal=20)
