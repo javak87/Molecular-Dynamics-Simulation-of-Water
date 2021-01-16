@@ -157,7 +157,7 @@ if __name__ == "__main__":
     # t_steps should be a multiple of t_interval, to include the last calculated data;
     # otherwise there will be unnecessary calculations, where the results won't be saved
 
-    mol_count = 5
+    mol_count = 10
 
     FileOperation.save_data(t_steps, t_interval, mol_count, "data.hdf5")
     FileOperation.write_hdf5_txt('data.hdf5')

@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     timesteps = 100
     time_interval = 2
-    molecule_count = 10
+    molecule_count = 15
 
     hdf5_file_name = "data.hdf5"
 
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     rgb_array_hydrogen = np.array([40, 40, 120])
     colours = Animation.define_colour_array(molecule_count, rgb_array_oxygen, rgb_array_hydrogen)
 
-    sizes_of_atoms = Animation.define_atom_size_array(molecule_count, 30, 3)
+    sizes_of_atoms = Animation.define_atom_size_array(molecule_count, 7.5, 3)
 
     fig = plt.figure()
 
