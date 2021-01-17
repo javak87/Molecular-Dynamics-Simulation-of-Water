@@ -151,13 +151,13 @@ class FileOperation:
 
 if __name__ == "__main__":
 
-    t_steps = 100
+    t_steps = 10
     t_interval = 2
 
     # t_steps should be a multiple of t_interval, to include the last calculated data;
     # otherwise there will be unnecessary calculations, where the results won't be saved
 
-    mol_count = 10
+    mol_count = 3
 
     FileOperation.save_data(t_steps, t_interval, mol_count, "data.hdf5")
     FileOperation.write_hdf5_txt('data.hdf5')
@@ -179,4 +179,4 @@ if __name__ == "__main__":
 
     # the same holds true for the vel_array
 
-    print(len(pos_array[0]))
+    print(pos_array[:][:][..., 0])
