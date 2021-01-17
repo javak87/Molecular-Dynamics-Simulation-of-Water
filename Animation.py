@@ -106,13 +106,13 @@ if __name__ == "__main__":
 
     # for animation, the atom-specific colours are now defined
 
-    rgb_array_oxygen = np.array([255, 140, 255])
-    rgb_array_hydrogen = np.array([40, 40, 120])
+    rgb_array_oxygen = np.array([180, 225, 0])
+    rgb_array_hydrogen = np.array([40, 40, 255])
     colours = Animation.define_colour_array(molecule_count, rgb_array_oxygen, rgb_array_hydrogen)
 
     # for animation, the atom-specific sizes (based roughly on VDW-radii) are now defined
 
-    sizes_of_atoms = Animation.define_atom_size_array(molecule_count, 25, 2)
+    sizes_of_atoms = Animation.define_atom_size_array(molecule_count, 62.7, 2)
 
     # the plot and figure are created, using the data from the hdf5 file
 
@@ -133,9 +133,9 @@ if __name__ == "__main__":
     # this gives a tuple containing the maximum (np.amax()) and minimum (np.amin()) values
     # of all available x-coordinates from all timesteps
 
-    x_position_range = (np.amax(position_array[:][:][..., 0]), np.amin(position_array[:][:][..., 0]))
-    y_position_range = (np.amax(position_array[:][:][..., 1]), np.amin(position_array[:][:][..., 1]))
-    z_position_range = (np.amax(position_array[:][:][..., 2]), np.amin(position_array[:][:][..., 2]))
+    x_position_range = (np.amin(position_array[:][:][..., 0]), np.amax(position_array[:][:][..., 0]))
+    y_position_range = (np.amin(position_array[:][:][..., 1]), np.amax(position_array[:][:][..., 1]))
+    z_position_range = (np.amin(position_array[:][:][..., 2]), np.amax(position_array[:][:][..., 2]))
     ax.set_xlim(x_position_range)
     ax.set_ylim(y_position_range)
     ax.set_zlim(z_position_range)

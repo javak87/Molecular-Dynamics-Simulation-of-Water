@@ -16,6 +16,17 @@ class FileOperation:
     @staticmethod
     def save_data(timesteps: int, time_interval: int, molecule_count: int, file_name: str):
 
+        """
+        This method saves the data coming from the integrator in a .hdf5 file with groups = timesteps and
+        datasets = Position and/or Velocity
+
+        :param timesteps:
+        :param time_interval:
+        :param molecule_count:
+        :param file_name:
+        :return:
+        """
+
         atom_count = molecule_count * 3
 
         hdf5_file = h5py.File(file_name, 'w')
@@ -102,13 +113,13 @@ class FileOperation:
     def extract_data_to_np_array(time_steps: int, time_interval: int, molecule_count: int, file_name: str):
 
         """
-        This is just a test function to see how the data is being put out in a text file.
-        Should not be used, except for testing purposes
-        :param file_name:
-        :param molecule_count:
-        :param time_steps:
-        :param time_interval:
-        :return: null
+        This method extracts data from .hdf5 and stores the data by group and dataset in a numpy-ndarray
+
+        :param file_name: Name of the file to extract data from
+        :param molecule_count: Number of simulated molecules (determines the shape of the resulting array)
+        :param time_steps: Number of time steps to be simulated
+        :param time_interval: Only every x-th data-point should be saved; this is ensured by this paramter
+        :return: numpy-ndarrays containing the positional and velocital information
         """
 
         atom_count = molecule_count * 3
@@ -178,5 +189,3 @@ if __name__ == "__main__":
     # pos_array[0][:][..., 2] will give all z-coordinates from all atom positions of the first time step
 
     # the same holds true for the vel_array
-
-    print(pos_array[:][:][..., 0])
