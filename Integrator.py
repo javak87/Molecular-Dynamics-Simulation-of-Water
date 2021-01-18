@@ -2,6 +2,8 @@ import numpy as np
 from lennard_jones import LennardJones
 from numpy.linalg import inv
 from vibration_effect import InterMolecularForce
+from lattice_config import LatticeConfig
+from initial_vel import InitialVelocity
 
 class Integrator :
 
@@ -70,3 +72,57 @@ class Integrator :
         velocity_full_step = np.dot (inv(mass_matrix), momenta_full_step)
 
         return position_full_step, velocity_full_step
+
+if __name__=="__main__":
+
+    
+    sigma = 3.166 # Angstroms
+    epsilon = 0.156 # Kcal/mole
+    box_len=1000 # Angstroms
+    r_cut= 500 # Angstroms
+    intmolecdist = 250 # Angstroms
+    hoh_angle = 103 # degree
+    oh_len = 0.97  # Angstroms
+    timespan= (0,0.1)
+    H_mass = 1.00794
+    O_mass = 16
+    no_atoms = 6
+    Kb = 0.001985875
+    temp = 298.15
+    compmethod = 'Cellink_PBC'
+
+    k_b=3.5
+    tet_eq=52
+    k_tet=1.2
+    # Apply position and velocity initialization
+
+    # Initialize position using lattice configuration        
+    lattice_object = LatticeConfig (intmolecdist, hoh_angle, oh_len, box_len)
+    initial_position = lattice_object()
+
+    # Initialize velocity using based on the Boltzmann constant
+    vel_object = InitialVelocity (O_mass, H_mass, Kb, temp)
+    initial_velocity = vel_object (initial_position.shape[0])
+
+    new_postate = initial_position
+    new_velocity =initial_velocity
+
+    # create LJ force object
+    lj_object = LennardJones(sigma, epsilon, compmethod, r_cut, box_len)
+
+    # create spring force object
+    sp_object = InterMolecularForce (oh_len, k_b, tet_eq, k_tet)
+
+    integrator_object = Integrator (O_mass, H_mass)
+
+    timespan = [0, 0.1]                       
+
+    lj_force =lj_object (new_postate)
+
+    sp_force = sp_object(new_postate)
+
+    force = lj_force + sp_force
+
+    new_pos, new_vel = integrator_object (new_postate, new_velocity, force , lj_object, sp_object, timespan)
+
+    print ('new position : \n', new_pos)

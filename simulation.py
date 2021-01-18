@@ -5,6 +5,9 @@ from lattice_config import LatticeConfig
 from initial_vel import InitialVelocity
 from vibration_effect import InterMolecularForce
 from Integrator import Integrator
+from FileOperation import FileOperation
+import h5py
+import sys
 
 
 class Simulation :
@@ -14,9 +17,8 @@ class Simulation :
                         oh_len: float, box_len: float,
                         O_mass: float, H_mass : float,
                         Kb: float, temp: float, sigma: float,
-                        epsilon: float, r_cut: float, compmethod: str, k_b: float, tet_eq: float, k_tet: float) :
+                        epsilon: float, r_cut: float, compmethod: str, k_b: float, tet_eq: float, k_tet: float, save_data_itr:int) :
                 
-                self.timespan = timespan
                 self.intmolecdist = intmolecdist
                 self.hoh_angle = hoh_angle
                 self.oh_len = oh_len
@@ -32,10 +34,11 @@ class Simulation :
                 self.tet_eq = tet_eq
                 self.k_tet = k_tet
                 self.k_b = k_b
+                self.save_data_itr = save_data_itr
                 
 
 
-        def __call__(self,  timespan)->np.ndarray:
+        def __call__(self)->np.ndarray:
 
                 # Apply position and velocity initialization
 
@@ -50,6 +53,13 @@ class Simulation :
                 new_postate = initial_position
                 new_velocity =initial_velocity
 
+                hdf5_file = h5py.File('data.hdf5','w')
+
+                # save the intial condition
+                new_group = hdf5_file.create_group('Timestep Identifier Number = {0}'.format(0))
+                new_group.create_dataset('Positions', data=new_postate)
+                new_group.create_dataset('Velocities', data=new_velocity)
+
                 # create LJ force object
                 lj_object = LennardJones(self.sigma, self.epsilon, self.compmethod, self.r_cut, self.box_len)
 
@@ -59,9 +69,13 @@ class Simulation :
                 # create Integrator object
                 integrator_object = Integrator (O_mass, H_mass)
 
+                
+
+
                 for i in range (grid.shape[0]-1) :
 
-                        timespan = (grid [i], grid [i+1])                       
+
+                        timespan = (grid [i], grid [i+1])
 
                         lj_force =lj_object (new_postate)
 
@@ -69,9 +83,20 @@ class Simulation :
 
                         force = lj_force + sp_force
 
-                        new_postate[i+1], new_velocity[i+1] = integrator_object (new_postate, new_velocity, force , lj_object, sp_object, timespan)
+                        new_postate, new_velocity = integrator_object (new_postate, new_velocity, force , lj_object, sp_object, timespan)
 
-                return new_postate, new_velocity
+                        if i % self.save_data_itr == 0 and i != 0 :
+
+                                new_group = hdf5_file.create_group('Timestep Identifier Number = {0}'.format(i / grid.shape[0]))
+                                new_group.create_dataset('Positions', data=new_postate)
+                                new_group.create_dataset('Velocities', data=new_velocity)
+                       
+
+                        # save new_postate, new_velocity
+                        #..
+                hdf5_file.close()
+                FileOperation.write_hdf5_txt('data.hdf5')
+                return new_postate.shape[0]/3
 
 
 if __name__=="__main__":
@@ -89,15 +114,24 @@ if __name__=="__main__":
         no_atoms = 6
         Kb = 0.001985875
         temp = 298.15
-        timespan = [0, 100]
+
+        k_b=3.5
+        tet_eq=52
+        k_tet=1.2
+
+        save_data_itr = 5
+
+
+        time = [0, 100]
         grid = np.linspace (timespan[0], timespan[1], 100)
 
 
-        
-        sim_object = Simulation (timespan,
-                        intmolecdist, hoh_angle,
+        sim =Simulation (grid, intmolecdist, hoh_angle,
                         oh_len, box_len,
                         O_mass, H_mass,
-                        Kb, temp)
+                        Kb, temp, sigma,
+                        epsilon, r_cut, 'Cellink_PBC', k_b, tet_eq, k_tet, save_data_itr)
+        molecule_count = sim ()
+        
+        
 
-        new_postate, new_velocity = sim_object (grid)
