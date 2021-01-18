@@ -88,9 +88,9 @@ if __name__ == "__main__":
 
     # defining initial values
 
-    timesteps = 100
+    timesteps = 60
     time_interval = 2
-    molecule_count = 100
+    molecule_count = 25
 
     # file creation for saving data
     # NOTE: the created .txt file is for testing purposes only !
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     graph = ax.scatter(position_array[0][:][..., 0], position_array[0][:][..., 1], position_array[0][:][..., 2],
                        c=colours/255, s=sizes_of_atoms)
 
-    anim_func = animation.FuncAnimation(fig, Animation.update_graph, timesteps // time_interval, interval=1, blit=False)
+    anim_func = animation.FuncAnimation(fig, Animation.update_graph, timesteps // time_interval, interval=50, blit=False)
 
     # finally show the animation
 

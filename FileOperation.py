@@ -110,7 +110,20 @@ class FileOperation:
             file.close()
 
     @staticmethod
-    def extract_data_to_np_array(time_steps: int, time_interval: int, molecule_count: int, file_name: str):
+    def return_molecule_count(file_name: str):
+
+        with h5py.File(file_name, 'r') as file:
+
+            np.set_printoptions(threshold=sys.maxsize)
+
+            for group in file:
+
+                for dataset in file[group]:
+
+                    return len(file["/" + group + "/" + dataset][:]) / 3
+
+    @staticmethod
+    def extract_data_to_np_array(time_steps: int, time_interval: int, file_name: str):
 
         """
         This method extracts data from .hdf5 and stores the data by group and dataset in a numpy-ndarray
@@ -122,13 +135,13 @@ class FileOperation:
         :return: numpy-ndarrays containing the positional and velocital information
         """
 
-        atom_count = molecule_count * 3
-
         with h5py.File(file_name, 'r') as file:
 
             np.set_printoptions(threshold=sys.maxsize)
 
             # necessary to print all entries of a numpy array / everything that uses numpy - style arrays
+
+            print(len(file["/group/dataset"][:]))
 
             array_of_positions = np.zeros(shape=((time_steps // time_interval) + 1, atom_count, 3))
             array_of_velocities = np.zeros(shape=((time_steps // time_interval) + 1, atom_count, 3))
@@ -168,13 +181,14 @@ if __name__ == "__main__":
     # t_steps should be a multiple of t_interval, to include the last calculated data;
     # otherwise there will be unnecessary calculations, where the results won't be saved
 
-    mol_count = 3
+    mol_count = 15
 
     FileOperation.save_data(t_steps, t_interval, mol_count, "data.hdf5")
     FileOperation.write_hdf5_txt('data.hdf5')
+    print(FileOperation.return_molecule_count('data.hdf5'))
 
-    pos_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, mol_count, "data.hdf5")[0])
-    vel_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, mol_count, "data.hdf5")[1])
+    #pos_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, "data.hdf5")[0])
+    #vel_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, "data.hdf5")[1])
 
     # pos_array[0] gives all atom - positions for the first time step
 
