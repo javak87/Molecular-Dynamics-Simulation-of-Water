@@ -104,16 +104,16 @@ if __name__=="__main__":
         sigma = 3.166 # Angstroms
         epsilon = 0.156 # Kcal/mole
         box_len=1000 # Angstroms
-        r_cut= 500 # Angstroms
-        intmolecdist = 250 # Angstroms
+        r_cut= 300 # Angstroms
+        intmolecdist = 250 # Angstroms 250 for water
         hoh_angle = 103 # degree
         oh_len = 0.97  # Angstroms
-        timespan= (0,0.1)
+        timespan= (0, 10)
         H_mass = 1.00794
         O_mass = 16
         no_atoms = 6
         Kb = 0.001985875
-        temp = 298.15
+        temp = 1000
 
         k_b=3.5
         tet_eq=52
@@ -122,8 +122,8 @@ if __name__=="__main__":
         save_data_itr = 5
 
 
-        time = [0, 100]
-        grid = np.linspace (timespan[0], timespan[1], 100)
+        
+        grid = np.linspace (timespan[0], timespan[1], 1000)
 
 
         sim =Simulation (grid, intmolecdist, hoh_angle,

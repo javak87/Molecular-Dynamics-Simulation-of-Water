@@ -88,17 +88,19 @@ if __name__ == "__main__":
 
     # defining initial values
 
-    timesteps = 100
-    time_interval = 2
-    molecule_count = 100
+    hdf5_file_name = "data.hdf5"
+
+
+    timesteps = 1000
+    time_interval = 5
+    molecule_count= int (FileIO.return_molecule_count('data.hdf5'))
 
     # file creation for saving data
     # NOTE: the created .txt file is for testing purposes only !
 
-    hdf5_file_name = "data.hdf5"
 
-    FileIO.save_data(timesteps, time_interval, molecule_count, "data.hdf5")
-    FileIO.write_hdf5_txt('data.hdf5')
+    #FileIO.save_data(timesteps, time_interval, molecule_count, "data.hdf5")
+    #FileIO.write_hdf5_txt('data.hdf5')
 
     # accessing the saved data and assigning the positional values to a numpy array
 
@@ -136,9 +138,9 @@ if __name__ == "__main__":
     x_position_range = (np.amin(position_array[:][:][..., 0]), np.amax(position_array[:][:][..., 0]))
     y_position_range = (np.amin(position_array[:][:][..., 1]), np.amax(position_array[:][:][..., 1]))
     z_position_range = (np.amin(position_array[:][:][..., 2]), np.amax(position_array[:][:][..., 2]))
-    ax.set_xlim(x_position_range)
-    ax.set_ylim(y_position_range)
-    ax.set_zlim(z_position_range)
+    ax.set_xlim(0, 1000)
+    ax.set_ylim(0, 10)
+    ax.set_zlim(0, 10)
 
     # create the graph with scatter points and animate the simulation using a repeated call to the update_graph method
 

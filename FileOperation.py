@@ -14,7 +14,7 @@ class FileOperation:
         pass
 
     @staticmethod
-    def save_data(timestep: int, position: np.ndarray, velocity: np.ndarray, file_name: str):
+    def save_data(timesteps: int, time_interval: int, molecule_count: int, file_name: str):
 
         """
         This method saves the data coming from the integrator in a .hdf5 file with groups = timesteps and
@@ -27,25 +27,17 @@ class FileOperation:
         :return:
         """
 
+        atom_count = molecule_count * 3
+
         hdf5_file = h5py.File(file_name, 'w')
 
-        
-        # r = np.random.rand(atom_count, 3)
-        #r = position
+        r = np.random.rand(atom_count, 3)
 
         # calculated positions from the integrator; right now just random data
 
-        #v = np.random.rand(atom_count, 3)
-        #v = velocity
+        v = np.random.rand(atom_count, 3)
 
         # calculated velocities from the integrator; right now just random data
-
-
-        new_group = hdf5_file.create_group('Timestep Identifier Number = {0}'.format(i / timesteps))
-        new_group.create_dataset('Positions', data=position)
-        new_group.create_dataset('Velocities', data=velocity)
-
-        '''
 
         for i in range(0, timesteps + 1):
 
@@ -73,7 +65,6 @@ class FileOperation:
 
             # ONLY used for generating retraceable data for visualisation;
             # DO NOT USE with actual, calculated data !
-            '''
 
         hdf5_file.close()
 
@@ -119,7 +110,20 @@ class FileOperation:
             file.close()
 
     @staticmethod
-    def extract_data_to_np_array(timesteps: int, time_interval: int, position: np.ndarray, velocity: np.ndarray, file_name: str):
+    def return_molecule_count(file_name: str):
+
+        with h5py.File(file_name, 'r') as file:
+
+            np.set_printoptions(threshold=sys.maxsize)
+
+            for group in file:
+
+                for dataset in file[group]:
+
+                    return len(file["/" + group + "/" + dataset][:]) / 3
+
+    @staticmethod
+    def extract_data_to_np_array(time_steps: int, time_interval: int, molecule_count: int, file_name: str):
 
         """
         This method extracts data from .hdf5 and stores the data by group and dataset in a numpy-ndarray
@@ -130,8 +134,7 @@ class FileOperation:
         :param time_interval: Only every x-th data-point should be saved; this is ensured by this paramter
         :return: numpy-ndarrays containing the positional and velocital information
         """
-
-        atom_count = position.shape[0] * 3
+        atom_count = molecule_count*3
 
         with h5py.File(file_name, 'r') as file:
 
@@ -177,13 +180,14 @@ if __name__ == "__main__":
     # t_steps should be a multiple of t_interval, to include the last calculated data;
     # otherwise there will be unnecessary calculations, where the results won't be saved
 
-    mol_count = 3
+    mol_count = 15
 
     FileOperation.save_data(t_steps, t_interval, mol_count, "data.hdf5")
     FileOperation.write_hdf5_txt('data.hdf5')
+    print(FileOperation.return_molecule_count('data.hdf5'))
 
-    pos_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, mol_count, "data.hdf5")[0])
-    vel_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, mol_count, "data.hdf5")[1])
+    #pos_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, "data.hdf5")[0])
+    #vel_array = np.array(FileOperation.extract_data_to_np_array(t_steps, t_interval, "data.hdf5")[1])
 
     # pos_array[0] gives all atom - positions for the first time step
 
