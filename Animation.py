@@ -5,13 +5,14 @@ import matplotlib.animation as animation
 import mpl_toolkits.mplot3d.axes3d as axes3d
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 from FileOperation import FileOperation as FileIO
 
 
 class Animation:
 
     @staticmethod
-    def update_graph(step: int):
+    def update_graph(step: int, maxstep: int, array: np.ndarray, t_interval: int, axis, update_interval: int):
 
         """
         This method updates the animated scatter points
@@ -22,10 +23,13 @@ class Animation:
 
         graph._offsets3d = \
             (
-                position_array[step][:][..., 0], position_array[step][:][..., 1], position_array[step][:][..., 2]
+                array[step][:][..., 0], array[step][:][..., 1], array[step][:][..., 2]
             )
 
-        # This is to update the animation
+        axis.set_title\
+            (
+                "3D Animation of scatters representing atoms\n\nTimestep: {0} / {1} fs, "
+                "Time Interval: {2} fs\n\nUpdate Interval For Animation: {3} ms".format(step * t_interval, maxstep, t_interval, update_interval))
 
     @staticmethod
     def define_colour_array(molecule_count: int, rgb_value_array_oxygen: np.ndarray, rgb_value_array_hydogen: np.ndarray):
@@ -88,37 +92,51 @@ if __name__ == "__main__":
 
     # defining initial values
 
-    timesteps = 60
-    time_interval = 2
-    molecule_count = 25
+    hdf5_file_name_one = "data_3000.hdf5"
+    hdf5_file_name_two = "data_1000.hdf5"
+    hdf_file_t_fine = 'data.hdf5'
 
+    timesteps_one = 3000
+    timesteps_two = 1000
+    timesteps_fine = 10000
+    time_interval = 10
+    molecule_count_one = int(FileIO.return_molecule_count('data_3000.hdf5'))
+    molecule_count_two = int(FileIO.return_molecule_count('data_1000.hdf5'))
+    molecule_count_fine = int(FileIO.return_molecule_count('data.hdf5'))
     # file creation for saving data
     # NOTE: the created .txt file is for testing purposes only !
 
-    hdf5_file_name = "data.hdf5"
 
-    FileIO.save_data(timesteps, time_interval, molecule_count, "data.hdf5")
-    FileIO.write_hdf5_txt('data.hdf5')
+    #FileIO.save_data(timesteps, time_interval, molecule_count, "data.hdf5")
+    #FileIO.write_hdf5_txt('data.hdf5')
 
     # accessing the saved data and assigning the positional values to a numpy array
 
-    position_array = np.array(FileIO.extract_data_to_np_array(timesteps, time_interval, molecule_count, hdf5_file_name)[0])
+    position_array_one = np.array(FileIO.extract_data_to_np_array(timesteps_one, time_interval, molecule_count_one, hdf5_file_name_one)[0])
+    velocity_array_one = np.array(FileIO.extract_data_to_np_array(timesteps_one, time_interval, molecule_count_one, hdf5_file_name_one)[1])
+
+    position_array_two = np.array(FileIO.extract_data_to_np_array(timesteps_two, time_interval, molecule_count_two, hdf5_file_name_two)[0])
+    velocity_array_two = np.array(FileIO.extract_data_to_np_array(timesteps_two, time_interval, molecule_count_two, hdf5_file_name_two)[1])
+
+    position_array_fine = np.array(FileIO.extract_data_to_np_array(timesteps_fine, time_interval, molecule_count_fine, hdf_file_t_fine)[0])
+    velocity_array_fine = np.array(FileIO.extract_data_to_np_array(timesteps_fine, time_interval, molecule_count_fine, hdf_file_t_fine)[1])
 
     # for animation, the atom-specific colours are now defined
 
-    rgb_array_oxygen = np.array([180, 225, 0])
-    rgb_array_hydrogen = np.array([40, 40, 255])
-    colours = Animation.define_colour_array(molecule_count, rgb_array_oxygen, rgb_array_hydrogen)
+    rgb_array_oxygen = np.array([255, 88, 32])
+    rgb_array_hydrogen = np.array([0, 96, 255])
+    colours = Animation.define_colour_array(molecule_count_fine, rgb_array_oxygen, rgb_array_hydrogen)
 
     # for animation, the atom-specific sizes (based roughly on VDW-radii) are now defined
 
-    sizes_of_atoms = Animation.define_atom_size_array(molecule_count, 62.7, 2)
+    sizes_of_atoms = Animation.define_atom_size_array(molecule_count_fine, 49, 2)
 
     # the plot and figure are created, using the data from the hdf5 file
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    title = ax.set_title("3D Test")
+
+    title = ax.set_title("3D Animation of scatters representing atoms; \n\nTimestep: {0}, Time Interval: {1}".format(0, time_interval))
     ax.set_xlabel("X - position")
     ax.set_ylabel("Y - position")
     ax.set_zlabel("Z - position")
@@ -133,20 +151,64 @@ if __name__ == "__main__":
     # this gives a tuple containing the maximum (np.amax()) and minimum (np.amin()) values
     # of all available x-coordinates from all timesteps
 
-    x_position_range = (np.amin(position_array[:][:][..., 0]), np.amax(position_array[:][:][..., 0]))
-    y_position_range = (np.amin(position_array[:][:][..., 1]), np.amax(position_array[:][:][..., 1]))
-    z_position_range = (np.amin(position_array[:][:][..., 2]), np.amax(position_array[:][:][..., 2]))
+    x_position_range = (np.amin(position_array_fine[:][:][..., 0]), np.amax(position_array_fine[:][:][..., 0]))
+    y_position_range = (np.amin(position_array_fine[:][:][..., 1]), np.amax(position_array_fine[:][:][..., 1]))
+    z_position_range = (np.amin(position_array_fine[:][:][..., 2]), np.amax(position_array_fine[:][:][..., 2]))
     ax.set_xlim(x_position_range)
     ax.set_ylim(y_position_range)
-    ax.set_zlim(z_position_range)
+    ax.set_zlim(0, 5)
 
     # create the graph with scatter points and animate the simulation using a repeated call to the update_graph method
 
-    graph = ax.scatter(position_array[0][:][..., 0], position_array[0][:][..., 1], position_array[0][:][..., 2],
+    graph = ax.scatter(position_array_fine[0][:][..., 0], position_array_fine[0][:][..., 1], position_array_fine[0][:][..., 2],
                        c=colours/255, s=sizes_of_atoms)
 
-    anim_func = animation.FuncAnimation(fig, Animation.update_graph, timesteps // time_interval, interval=50, blit=False)
+    update_interval_animation = 10 # in milliseconds
+
+    anim_func = animation.FuncAnimation\
+        (
+            fig,
+            Animation.update_graph,
+            timesteps_fine // time_interval,
+            fargs=
+            (
+                timesteps_fine,
+                position_array_fine,
+                time_interval,
+                ax,
+                update_interval_animation
+            ),
+            interval=update_interval_animation,
+            blit=False
+        )
 
     # finally show the animation
+
+    plt.show()
+
+    # show the trajectory of the first hydrogen atom in x - direction
+
+    fig = plt.figure()
+    fig.add_subplot()
+
+    plt.plot(position_array_fine[:][:, 1][..., 0], velocity_array_fine[:][:, 1][..., 0])
+    plt.xlabel('X - coordinate')
+    plt.ylabel('Velocity in X - direction')
+
+    plt.show()
+
+    # show the trajectory of the first hydrogen atom in y - direction
+
+    plt.plot(position_array_fine[:][:, 1][..., 1], velocity_array_fine[:][:, 1][..., 1])
+    plt.xlabel('Y - coordinate')
+    plt.ylabel('Velocity in Y - direction')
+
+    plt.show()
+
+    # show the trajectory of the first hydrogen atom in z - direction
+
+    plt.plot(position_array_fine[:][:, 1][..., 2], velocity_array_fine[:][:, 1][..., 2])
+    plt.xlabel('Z - coordinate')
+    plt.ylabel('Velocity in Z - direction')
 
     plt.show()
