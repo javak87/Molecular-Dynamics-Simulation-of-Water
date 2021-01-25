@@ -16,8 +16,10 @@ def _gen_relevant_images(x, bounds, distance_upper_bound):
     # mirror images
     real_x = x - np.where(bounds > 0.0,
                           np.floor(x / bounds) * bounds, 0.0)
-    m = len(x)
+    #m = len(x)
+    m= x.shape[0]
     
+    print (real_x)
     xs_to_try = [real_x]
     for i in range(m):
         if bounds[i] > 0.0:
@@ -30,7 +32,7 @@ def _gen_relevant_images(x, bounds, distance_upper_bound):
                         (_ + disp, _, _ - disp) for _ in xs_to_try))
             else:
                 extra_xs = []
-                
+                print (xs_to_try)
                 # Point near lower boundary, include image on upper side
                 if abs(real_x[i]) < distance_upper_bound:
                     extra_xs.extend(_ + disp for _ in xs_to_try)
@@ -392,3 +394,29 @@ class PeriodicCKDTree(cKDTree):
         
     def sparse_distance_matrix(self, other, max_distance, p=2.):
         raise NotImplementedError()
+
+
+if __name__=="__main__":
+
+    bounds = np.array([5, 5, 5])
+
+    postate = np.arange(12).reshape(4,3)
+    #np.array([0.2, 0.3, 0.4])
+    #np.arange(12).reshape(4,3)
+    real_x = postate - np.where(bounds > 0.0, np.floor(postate / bounds) * bounds, 0.0)
+    print (np.where(bounds > 0.0, np.floor(postate / bounds) * bounds, 0.0))
+
+    #image = _gen_relevant_images(postate, bounds, 0)
+
+    print ('image is \n', real_x)
+
+    # Build kd-tre
+    #postate = np.array([1001, 1000, 1000])
+    #tree = PeriodicCKDTree(bounds, postate)
+
+
+
+    # Find neighbors within a fixed distance of a point
+    #neighbors = tree.query_ball_point(self.target_position, r=self.r_cut)
+
+    #new_state = np.take(self.postate, neighbors, axis=0)

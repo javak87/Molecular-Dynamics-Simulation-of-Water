@@ -69,7 +69,7 @@ class Simulation :
                 # create Integrator object
                 integrator_object = Integrator (O_mass, H_mass)
 
-                
+                bounds = np.array([self.box_len, self.box_len, self.box_len])
 
 
                 for i in range (grid.shape[0]-1) :
@@ -84,6 +84,9 @@ class Simulation :
                         force = lj_force + sp_force
 
                         new_postate, new_velocity = integrator_object (new_postate, new_velocity, force , lj_object, sp_object, timespan)
+
+                        new_postate = new_postate - np.where(bounds > 0.0, np.floor(new_postate / bounds) * bounds, 0.0)
+
 
                         if i % self.save_data_itr == 0 and i != 0 :
 
@@ -111,7 +114,6 @@ if __name__=="__main__":
         timespan= (0, 10)
         H_mass = 1.00794
         O_mass = 16
-        no_atoms = 6
         Kb = 0.001985875
         temp = 1000
 
@@ -123,7 +125,7 @@ if __name__=="__main__":
 
 
         
-        grid = np.linspace (timespan[0], timespan[1], 1000)
+        grid = np.linspace (timespan[0], timespan[1], 3000)
 
 
         sim =Simulation (grid, intmolecdist, hoh_angle,
