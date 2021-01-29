@@ -40,6 +40,8 @@ class EwaldSummation :
         images_object = GenerateImages (postate, self.bounds, self.box_len)
         periodic_images = images_object.expand_images()
 
+        print (periodic_images)
+
 
         # assign oxygen and Hydrogen charge to all atoms
         point_charge = np.zeros((postate.shape[0],1))
@@ -84,8 +86,8 @@ if __name__=="__main__":
     epszero = 0.8987
     box_len = 10
     sd_dev = 2
-    postate = np.random.randint(low=1, high=10, size = (60,3))
-    #print (postate)
+    postate = np.random.randint(low=1, high=10, size = (3,3))
+    print (postate)
     force_obj = EwaldSummation (O_charge, H_charge, epszero, box_len, sd_dev)
     force_ES = force_obj(postate)
     #print (force_ES)

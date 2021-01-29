@@ -8,6 +8,7 @@ from Integrator import Integrator
 from FileOperation import FileOperation
 import h5py
 import sys
+from apply_periodic_boundary import PeriodicBoundary
 
 
 class Simulation :
@@ -85,7 +86,9 @@ class Simulation :
 
                         new_postate, new_velocity = integrator_object (new_postate, new_velocity, force , lj_object, sp_object, timespan)
 
-                        new_postate = new_postate - np.where(bounds > 0.0, np.floor(new_postate / bounds) * bounds, 0.0)
+                        # Apply periodic boundary condition for water molecules
+                        new_postate_obj = PeriodicBoundary (self.box_len, new_postate)
+                        new_postate = new_postate_obj()
 
 
                         if i % self.save_data_itr == 0 and i != 0 :
@@ -106,9 +109,9 @@ if __name__=="__main__":
 
         sigma = 3.166 # Angstroms
         epsilon = 0.156 # Kcal/mole
-        box_len=1000 # Angstroms
-        r_cut= 300 # Angstroms
-        intmolecdist = 250 # Angstroms 250 for water
+        box_len=10 # Angstroms
+        r_cut= 1 # Angstroms
+        intmolecdist = 3 # Angstroms 3 for water
         hoh_angle = 103 # degree
         oh_len = 0.97  # Angstroms
         timespan= (0, 10)
@@ -125,7 +128,7 @@ if __name__=="__main__":
 
 
         
-        grid = np.linspace (timespan[0], timespan[1], 3000)
+        grid = np.linspace (timespan[0], timespan[1], 4000)
 
 
         sim =Simulation (grid, intmolecdist, hoh_angle,

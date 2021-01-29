@@ -91,7 +91,7 @@ if __name__ == "__main__":
     hdf5_file_name = "data.hdf5"
 
 
-    timesteps = 3000
+    timesteps = 4000
     time_interval = 5
     molecule_count= int (FileIO.return_molecule_count('data.hdf5'))
 
@@ -138,9 +138,9 @@ if __name__ == "__main__":
     x_position_range = (np.amin(position_array[:][:][..., 0]), np.amax(position_array[:][:][..., 0]))
     y_position_range = (np.amin(position_array[:][:][..., 1]), np.amax(position_array[:][:][..., 1]))
     z_position_range = (np.amin(position_array[:][:][..., 2]), np.amax(position_array[:][:][..., 2]))
-    ax.set_xlim(0, 1000)
-    ax.set_ylim(0, 1000)
-    ax.set_zlim(0, 1000)
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 10)
+    ax.set_zlim(0, 10)
 
     # create the graph with scatter points and animate the simulation using a repeated call to the update_graph method
 
