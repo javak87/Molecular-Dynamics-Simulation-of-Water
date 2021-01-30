@@ -37,12 +37,15 @@ class InitialVelocity :
         A_oxygen = math.sqrt (12*self.Kb*self.temp/self.O_mass)
 
         # Initialize oxygen atoms velocity
+        np.random.seed(0)
         oxygen_vel = A_oxygen*(np.random.random((math.floor(no_atoms/3),3)) - 0.5*np.ones ((math.floor(no_atoms/3),3), dtype=float))
+        
 
         # compute A constant for hydrogen
         A_hydrogen = math.sqrt (12*self.Kb*self.temp/self.O_mass)
 
         # Initialize hydrogen atoms velocity
+        np.random.seed(1)
         hydrogen_vel = A_hydrogen*(np.random.random((math.floor(no_atoms*2/3),3)) - 0.5*np.ones ((math.floor(no_atoms*2/3),3), dtype=float))
 
         # store all velocities in a numpy array
@@ -57,7 +60,7 @@ if __name__=="__main__":
     all_velocities = vel_object (no_atoms=6)
     print (all_velocities)
     A = np.sum(all_velocities, axis=0)
-    print (A)
+    #print (A)
 
 
 
