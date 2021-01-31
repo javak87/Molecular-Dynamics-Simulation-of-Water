@@ -79,8 +79,8 @@ class EwaldSummation:
         f_img = np.matmul(np.transpose(k_vec), (np.cos(krs) * sk_img[:,None] + np.sin(krs) * sk_real[:,None]) * \
                 expsigma[:,None]) ## array shape 3*N
 
-        f_real = charges * np.transpose(f_real) * prefac * 4
-        f_img = charges * np.transpose(f_img) * prefac * 4
+        f_real = charges[:,None] * np.transpose(f_real) * prefac * 4
+        f_img = charges[:,None] * np.transpose(f_img) * prefac * 4
 
         return energy_l, f_real, f_img
 
