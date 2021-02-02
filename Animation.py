@@ -12,7 +12,7 @@ from FileOperation import FileOperation as FileIO
 class Animation:
 
     @staticmethod
-    def update_graph(step: int, maxstep: int, array: np.ndarray, t_interval: int, axis, update_interval: int):
+    def update_graph(step: int, maxstep: int, graph, array: np.ndarray, t_interval: int, axis, update_interval: int):
 
         """
         This method updates the animated scatter points
