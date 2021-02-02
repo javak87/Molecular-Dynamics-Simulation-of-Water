@@ -56,7 +56,6 @@ class EwaldSummation :
 
         # compute ri-rj-nL vector
         periodic_vector =  postate[:, np.newaxis] - periodic_images[np.newaxis, :]
-
         # compute vector norm (|ri-rj-nL|)
         norm_periodic_vector = np.linalg.norm (periodic_vector, axis=2).reshape(periodic_vector.shape[0], periodic_vector.shape[1], 1)
 

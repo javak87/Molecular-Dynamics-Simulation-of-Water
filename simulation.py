@@ -20,6 +20,7 @@ class Simulation :
                         Kb: float, temp: float, sigma: float,
                         epsilon: float, r_cut: float, compmethod: str, k_b: float, tet_eq: float, k_tet: float, save_data_itr:int) :
                 
+                self.grid = grid
                 self.intmolecdist = intmolecdist
                 self.hoh_angle = hoh_angle
                 self.oh_len = oh_len
@@ -68,15 +69,15 @@ class Simulation :
                 sp_object = InterMolecularForce (self.oh_len, self.k_b, self.tet_eq, self.k_tet)
 
                 # create Integrator object
-                integrator_object = Integrator (O_mass, H_mass)
+                integrator_object = Integrator (self.O_mass, self.H_mass)
 
                 bounds = np.array([self.box_len, self.box_len, self.box_len])
 
 
-                for i in range (grid.shape[0]-1) :
+                for i in range (self.grid.shape[0]-1) :
 
 
-                        timespan = (grid [i], grid [i+1])
+                        timespan = (self.grid [i], self.grid [i+1])
 
                         lj_force =lj_object (new_postate)
 
@@ -93,7 +94,7 @@ class Simulation :
 
                         if i % self.save_data_itr == 0 and i != 0 :
 
-                                new_group = hdf5_file.create_group('Timestep Identifier Number = {0}'.format(i / grid.shape[0]))
+                                new_group = hdf5_file.create_group('Timestep Identifier Number = {0}'.format(i / self.grid.shape[0]))
                                 new_group.create_dataset('Positions', data=new_postate)
                                 new_group.create_dataset('Velocities', data=new_velocity)
                        
@@ -102,14 +103,14 @@ class Simulation :
                         #..
                 hdf5_file.close()
                 FileOperation.write_hdf5_txt('data.hdf5')
-                return new_postate.shape[0]/3
+                return new_postate
 
 
 if __name__=="__main__":
 
         sigma = 3.166 # Angstroms
         epsilon = 0.156 # Kcal/mole
-        box_len=10 # Angstroms
+        box_len=15 # Angstroms
         r_cut= 1 # Angstroms
         intmolecdist = 3 # Angstroms 3 for water
         hoh_angle = 103 # degree
@@ -118,7 +119,7 @@ if __name__=="__main__":
         H_mass = 1.00794
         O_mass = 16
         Kb = 0.001985875
-        temp = 1000
+        temp = 273
 
         k_b=3.5
         tet_eq=52
@@ -128,15 +129,15 @@ if __name__=="__main__":
 
 
         
-        grid = np.linspace (timespan[0], timespan[1], 4000)
+        grid = np.linspace (timespan[0], timespan[1], 1000)
 
 
         sim =Simulation (grid, intmolecdist, hoh_angle,
                         oh_len, box_len,
                         O_mass, H_mass,
                         Kb, temp, sigma,
-                        epsilon, r_cut, 'Cellink_PBC', k_b, tet_eq, k_tet, save_data_itr)
-        molecule_count = sim ()
+                        epsilon, r_cut, 'Naive', k_b, tet_eq, k_tet, save_data_itr)
+        postate = sim ()
         
         
 

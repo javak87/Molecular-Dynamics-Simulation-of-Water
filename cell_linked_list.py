@@ -37,13 +37,13 @@ class CellLinked ():
                 list_arr (list):   list array in the linked list (list_arr.shape==number of particles)
         """
 
-
         for i in range (0, self.postate.shape[0]) :
 
             # calculate cell index of each particles based on the particle position
             index = self._cellindex (self.postate[i,:])
 
             # calculate list array
+
             self.list_arr [i] = self.head_arr [index]
 
             # calculate head array         
@@ -209,13 +209,14 @@ class FindParticleDistance () :
 
 if __name__=="__main__":
 
-    box_len=3
-    r_cut= 1
-    postate = box_len * np.random.random_sample((20, 3))
-    print (postate)
+    box_len=12
+    r_cut= 6
+    postate = box_len * np.random.random_sample((24, 3))
+    print (postate.shape)
 
-    effective_state = CellLinkedPeriodic (box_len, r_cut, postate, postate[1,:])
-    print (effective_state)
+    effective_state = CellLinked (box_len, r_cut, postate)
+    result = effective_state()
+    print (result)
 
     #target_particle = np.array([0, 0, 0]).reshape(1,3)
     #model = FindParticleDistance (target_particle, postate, 1.5)

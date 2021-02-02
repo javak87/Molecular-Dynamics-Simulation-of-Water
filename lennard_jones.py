@@ -104,7 +104,7 @@ class LennardJones:
             # compute particles inside of each cells and other neighbor cells
             effective_state = result._find_particles_inside_neighbor_cells (list_arr, head_arr, neighbor_cells)
 
-            state_object = FindParticleDistance (postate[i,:], effective_state, r_cut)
+            state_object = FindParticleDistance (postate[i,:], effective_state, self.r_cut)
             effective_state = state_object._find_particles_distance_inside_neighbor_cells()          
 
             # compute euclidean distance between each original particle and other particles
@@ -175,9 +175,9 @@ if __name__=="__main__":
 
     sigma = 3.166 # Angstroms
     epsilon = 0.156 # Kcal/mole
-    box_len=1000 # Angstroms
-    r_cut= 500 # Angstroms
-    intmolecdist = 250 # Angstroms
+    box_len=12 # Angstroms
+    r_cut= 7 # Angstroms
+    intmolecdist = 3 # Angstroms
     hoh_angle = 103 # degree
     oh_len = 0.97  # Angstroms
     lattice_object = LatticeConfig (intmolecdist, hoh_angle, oh_len, box_len)
@@ -190,7 +190,7 @@ if __name__=="__main__":
     
 
     start1 = time.time()
-    model = LennardJones(sigma, epsilon, 'Cellink_PBC', r_cut, box_len)
+    model = LennardJones(sigma, epsilon, 'Cellink', r_cut, box_len)
     result = model (postate)
     #print (result)
     end1 = time.time()
