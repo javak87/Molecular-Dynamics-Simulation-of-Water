@@ -139,9 +139,9 @@ class InterMolecularForce :
         angle = np.arccos(dot_product)
 
         # compute forces
-        bend_force_H1 = -2* self.k_tet*pH1*(angle - tet_eq_radi)/(np.linalg.norm(vector_OH1, axis=1).reshape(-1,1))
+        bend_force_H1 = -self.k_tet*pH1*(angle - tet_eq_radi)/(np.linalg.norm(vector_OH1, axis=1).reshape(-1,1))
 
-        bend_force_H2 = -2* self.k_tet*pH2*(angle - tet_eq_radi)/(np.linalg.norm(vector_OH2, axis=1).reshape(-1,1))
+        bend_force_H2 = -self.k_tet*pH2*(angle - tet_eq_radi)/(np.linalg.norm(vector_OH2, axis=1).reshape(-1,1))
 
         bend_force_O = -1*(bend_force_H1+bend_force_H2)
 
@@ -169,7 +169,7 @@ if __name__=="__main__":
     force_object = InterMolecularForce(r_eq=oh_len, k_b=3.5, tet_eq=52, k_tet=1.2)
     spring_force = force_object (lattice_postate)
     
-    print (spring_force)
+    print (spring_force.sum(0))
 
 
 

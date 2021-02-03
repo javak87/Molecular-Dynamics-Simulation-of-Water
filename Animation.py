@@ -26,10 +26,11 @@ class Animation:
                 array[step][:][..., 0], array[step][:][..., 1], array[step][:][..., 2]
             )
 
-        axis.set_title\
+        #axis.set_title\
+        plt.title\
             (
                 "3D Animation of scatters representing atoms\n\nTimestep: {0} / {1} fs, "
-                "Time Interval: {2} fs\n\nUpdate Interval For Animation: {3} ms".format(step * t_interval, maxstep, t_interval, update_interval))
+                "Time Interval: {2} fs\n\nUpdate Interval For Animation: {3} ms".format(step * t_interval, maxstep, t_interval, update_interval), loc='center', y=1.0)
 
     @staticmethod
     def define_colour_array(molecule_count: int, rgb_value_array_oxygen: np.ndarray, rgb_value_array_hydogen: np.ndarray):
@@ -87,7 +88,7 @@ class Animation:
 
         return size_array
 
-
+'''
 if __name__ == "__main__":
 
     # defining initial values
@@ -212,3 +213,4 @@ if __name__ == "__main__":
     plt.ylabel('Velocity in Z - direction')
 
     plt.show()
+    '''

@@ -13,7 +13,7 @@ intmolecdist = 3 # Angstroms 3 for water
 # velocity Initialization parameters
 H_mass = 1.00794
 O_mass = 16
-Kb = 0.001985875
+Kb = 3.297623483e-21
 temp = 273
 
 # Lennard-Jones force inputs
@@ -24,13 +24,13 @@ compmethod = 'Naive' # "Naive", "Cellink" or "Cellink_PBC"
 
 # Internal potential parameters
 hoh_angle = 103 # degree
-oh_len = 0.97  # Angstroms
-k_b=3.5
-tet_eq=52
-k_tet=1.2
+oh_len = 1.012  # Angstroms
+k_b = 1059.162
+tet_eq = 113.24
+k_tet = 75.90
 
 # Time Integration parameters
-timesteps = 1000
+timesteps = 2000
 timespan= (0, 10)
 grid = np.linspace (timespan[0], timespan[1], timesteps)
 
