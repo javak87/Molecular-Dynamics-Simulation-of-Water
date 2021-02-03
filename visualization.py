@@ -30,7 +30,7 @@ class Visualization :
 
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111, projection='3d')
-        title = self.ax.set_title("Visualization of water molecules")
+        title = plt.title("Visualization of water molecules", loc='center', y=1.0)
         self.ax.set_xlabel("X - position")
         self.ax.set_ylabel("Y - position")
         self.ax.set_zlabel("Z - position")
@@ -96,13 +96,14 @@ class Visualization :
         self.ax.set_zlim(z_position_range)
 
         # for animation, the atom-specific colours are now defined
-        rgb_array_oxygen = np.array([180, 225, 0])
-        rgb_array_hydrogen = np.array([40, 40, 255])
+        #rgb_array_oxygen = np.array([180, 225, 0])
+        rgb_array_oxygen = np.array([255, 0, 0])
+        rgb_array_hydrogen = np.array([0, 0, 255])
         colours = Animation.define_colour_array(self.molecule_count, rgb_array_oxygen, rgb_array_hydrogen)
 
         # for animation, the atom-specific sizes (based roughly on VDW-radii) are now defined
 
-        sizes_of_atoms = Animation.define_atom_size_array(self.molecule_count, 62.7, 2)
+        sizes_of_atoms = Animation.define_atom_size_array(self.molecule_count, 67.2, 2)
 
         graph = self.ax.scatter(self.position_array[0][:][..., 0], self.position_array[0][:][..., 1], self.position_array[0][:][..., 2],
                         c=colours/255, s=sizes_of_atoms)

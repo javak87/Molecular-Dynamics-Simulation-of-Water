@@ -47,7 +47,7 @@ class LennardJones:
 
         # Make sure that no unsupported keywords were passed for the current compmethod
 
-        assert self.compmethod == 'Naive' or self.compmethod == 'Cellink' or self.compmethod == 'Cellink_PBC', 'computation method is selected wrongly. computation method should be "Normal" or "Cellink" or Cellink_PBC'
+        assert self.compmethod == 'Naive' or self.compmethod == 'Cellink' or self.compmethod == 'Cellink_PBC', 'computation method is selected wrongly. computation method should be "Naive" or "Cellink" or Cellink_PBC'
 
 
         if self.compmethod == 'Naive' :
