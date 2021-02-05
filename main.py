@@ -27,7 +27,8 @@ print ('You want to visualize the result stored in the hdf5 file or want to simu
 print ('if you want to simulate water molecules, this process might the time-consuming. \n')
 print ('------------\n')
 
-vis_or_sim = input ('Please insert "vis" for visualization and insert "sim" for simulation : \n')
+#vis_or_sim = input ('Please insert "vis" for visualization and insert "sim" for simulation : \n')
+vis_or_sim = 'sim'
 
 # Visualize the result stored in the hdf5 file
 if vis_or_sim == 'vis' :

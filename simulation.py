@@ -48,12 +48,15 @@ class Simulation :
                 lattice_object = LatticeConfig (self.intmolecdist, self.hoh_angle, self.oh_len, self.box_len)
                 initial_position = lattice_object()
 
+                print (initial_position)
+
                 # Initialize velocity using based on the Boltzmann constant
                 vel_object = InitialVelocity (self.O_mass, self.H_mass, self.Kb, self.temp)
                 initial_velocity = vel_object (initial_position.shape[0])
 
                 new_postate = initial_position
                 new_velocity =initial_velocity
+
 
                 hdf5_file = h5py.File('data.hdf5','w')
 
@@ -77,15 +80,17 @@ class Simulation :
                 for i in range (self.grid.shape[0]-1) :
 
 
+                        #print (i)
                         timespan = (self.grid [i], self.grid [i+1])
 
                         lj_force =lj_object (new_postate)
 
                         sp_force = sp_object(new_postate)
 
-                        force = lj_force + sp_force
+                        force = sp_force
 
                         new_postate, new_velocity = integrator_object (new_postate, new_velocity, force , lj_object, sp_object, timespan)
+                        #print ('new pos \n', new_postate)
 
                         # Apply periodic boundary condition for water molecules
                         new_postate_obj = PeriodicBoundary (self.box_len, new_postate)
@@ -110,7 +115,7 @@ if __name__=="__main__":
 
         sigma = 3.166 # Angstroms
         epsilon = 0.156 # Kcal/mole
-        box_len=15 # Angstroms
+        box_len=6 # Angstroms
         r_cut= 1 # Angstroms
         intmolecdist = 3 # Angstroms 3 for water
         hoh_angle = 103 # degree
