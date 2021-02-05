@@ -55,6 +55,7 @@ class Simulation :
                 new_postate = initial_position
                 new_velocity =initial_velocity
 
+
                 hdf5_file = h5py.File('data.hdf5','w')
 
                 # save the intial condition
@@ -83,7 +84,7 @@ class Simulation :
 
                         sp_force = sp_object(new_postate)
 
-                        force = lj_force + sp_force
+                        force = sp_force + lj_force
 
                         new_postate, new_velocity = integrator_object (new_postate, new_velocity, force , lj_object, sp_object, timespan)
 
@@ -110,7 +111,7 @@ if __name__=="__main__":
 
         sigma = 3.166 # Angstroms
         epsilon = 0.156 # Kcal/mole
-        box_len=15 # Angstroms
+        box_len=6 # Angstroms
         r_cut= 1 # Angstroms
         intmolecdist = 3 # Angstroms 3 for water
         hoh_angle = 103 # degree

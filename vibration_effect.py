@@ -77,15 +77,15 @@ class InterMolecularForce :
         #eq_OH1 = r_eq*vector_OH1_hat
         #eq_OH2 = r_eq*vector_OH2_hat
 
-        dist_OH1 = np.linalg.norm(vector_OH1)
-        dist_OH2 = np.linalg.norm(vector_OH2)
+        dist_OH1 = np.linalg.norm(vector_OH1, axis=1)
+        dist_OH2 = np.linalg.norm(vector_OH2, axis=1)
 
         # Calculate first O-H bond force
         #spring_force_H1 = -k_b* (vector_OH1-eq_OH1)
-        spring_force_H1 = -self.k_b* (dist_OH1-self.r_eq)*vector_OH1_hat
+        spring_force_H1 = -self.k_b* (dist_OH1-self.r_eq)[:, None]*vector_OH1_hat
 
         # Calculate second O-H bond force
-        spring_force_H2 = -self.k_b* (dist_OH2-self.r_eq)*vector_OH2_hat
+        spring_force_H2 = -self.k_b* (dist_OH2-self.r_eq)[:, None]*vector_OH2_hat
 
 
         # Calculate imposed force to Oxyegene
@@ -114,10 +114,10 @@ class InterMolecularForce :
         second_H = postate[2::3]
 
         # extract oxygen 
-        oxygen = postate[0::3]   
+        oxygen = postate[0::3]
 
         # create H1O vector
-        vector_OH1 = first_H - oxygen 
+        vector_OH1 = first_H - oxygen
 
         # create H2O
         vector_OH2 = second_H - oxygen
@@ -137,6 +137,7 @@ class InterMolecularForce :
         vector_OH2_hat = vector_OH2 / np.linalg.norm(vector_OH2, axis=1).reshape(-1,1)
         dot_product = np.expand_dims (np.sum(vector_OH1_hat*vector_OH2_hat, axis=1), axis =1)
         angle = np.arccos(dot_product)
+
 
         # compute forces
         bend_force_H1 = -self.k_tet*pH1*(angle - tet_eq_radi)/(np.linalg.norm(vector_OH1, axis=1).reshape(-1,1))
@@ -158,18 +159,18 @@ class InterMolecularForce :
 
 if __name__=="__main__":
 
-    intmolecdist = 0.31
+    intmolecdist = 3
     hoh_angle = 103
-    oh_len = 0.97
-    box_len = 3
+    oh_len = 1
+    box_len = 8
 
-    lattice_object = LatticeConfig (intmolecdist, hoh_angle, oh_len=1.97, box_len=10)
+    lattice_object = LatticeConfig (intmolecdist, hoh_angle, oh_len, box_len)
     lattice_postate = lattice_object()
 
-    force_object = InterMolecularForce(r_eq=oh_len, k_b=3.5, tet_eq=52, k_tet=1.2)
+    force_object = InterMolecularForce(r_eq=oh_len, k_b=1059.162, tet_eq=103, k_tet=75)
     spring_force = force_object (lattice_postate)
     
-    print (spring_force.sum(0))
+    #print (spring_force.sum(0))
 
 
 
