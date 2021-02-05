@@ -48,8 +48,6 @@ class Simulation :
                 lattice_object = LatticeConfig (self.intmolecdist, self.hoh_angle, self.oh_len, self.box_len)
                 initial_position = lattice_object()
 
-                print (initial_position)
-
                 # Initialize velocity using based on the Boltzmann constant
                 vel_object = InitialVelocity (self.O_mass, self.H_mass, self.Kb, self.temp)
                 initial_velocity = vel_object (initial_position.shape[0])
@@ -80,17 +78,15 @@ class Simulation :
                 for i in range (self.grid.shape[0]-1) :
 
 
-                        #print (i)
                         timespan = (self.grid [i], self.grid [i+1])
 
                         lj_force =lj_object (new_postate)
 
                         sp_force = sp_object(new_postate)
 
-                        force = sp_force
+                        force = sp_force + lj_force
 
                         new_postate, new_velocity = integrator_object (new_postate, new_velocity, force , lj_object, sp_object, timespan)
-                        #print ('new pos \n', new_postate)
 
                         # Apply periodic boundary condition for water molecules
                         new_postate_obj = PeriodicBoundary (self.box_len, new_postate)

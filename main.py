@@ -14,6 +14,7 @@ from FileOperation import FileOperation
 import h5py
 import sys
 from apply_periodic_boundary import PeriodicBoundary
+import pickle
 
 from visualization import Visualization
 from simulation import Simulation
@@ -50,6 +51,11 @@ else :
 
     viusl_obj = Visualization (timesteps, update_interval_animation, save_data_itr, hdf5_file_name, x_upper, y_upper, z_upper)
     visual_result = viusl_obj()
+
+# save the last step of molecule's position
+f = open('solution_n_800.pckl', 'wb')
+pickle.dump(postate, f)
+f.close()
 
 print ('The package runs successfully\n')
 

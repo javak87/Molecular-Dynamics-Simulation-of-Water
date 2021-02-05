@@ -64,7 +64,7 @@ class Integrator :
         # calculate forces
         lj_force = lj_object (position_full_step)
         spring_force = sp_object(position_full_step)
-        force = spring_force
+        force = spring_force + lj_force
 
         momenta_full_step = momenta_half_step + ( timespan[1] - timespan[0] ) * force / 2
 

@@ -77,15 +77,15 @@ class InterMolecularForce :
         #eq_OH1 = r_eq*vector_OH1_hat
         #eq_OH2 = r_eq*vector_OH2_hat
 
-        dist_OH1 = np.linalg.norm(vector_OH1)
-        dist_OH2 = np.linalg.norm(vector_OH2)
+        dist_OH1 = np.linalg.norm(vector_OH1, axis=1)
+        dist_OH2 = np.linalg.norm(vector_OH2, axis=1)
 
         # Calculate first O-H bond force
         #spring_force_H1 = -k_b* (vector_OH1-eq_OH1)
-        spring_force_H1 = -self.k_b* (dist_OH1-self.r_eq)*vector_OH1_hat
+        spring_force_H1 = -self.k_b* (dist_OH1-self.r_eq)[:, None]*vector_OH1_hat
 
         # Calculate second O-H bond force
-        spring_force_H2 = -self.k_b* (dist_OH2-self.r_eq)*vector_OH2_hat
+        spring_force_H2 = -self.k_b* (dist_OH2-self.r_eq)[:, None]*vector_OH2_hat
 
 
         # Calculate imposed force to Oxyegene
@@ -110,32 +110,23 @@ class InterMolecularForce :
         # extract first hydrogen
         first_H = postate[1::3]
 
-        #print ('first',first_H)
-
         # extract second hydrogen
         second_H = postate[2::3]
-        #print ('second',second_H)
 
         # extract oxygen 
         oxygen = postate[0::3]
-        #print ('oxygen',oxygen)   
 
         # create H1O vector
         vector_OH1 = first_H - oxygen
-        #print ('vector_OH1 \n', vector_OH1)
 
         # create H2O
         vector_OH2 = second_H - oxygen
-        #print ('vector_OH2 \n', vector_OH2)
 
         vector_H2O = oxygen - second_H
 
         tet_eq_radi = self.tet_eq*math.pi/180
 
-        #print ('--------------------')
-        #print (vector_OH1)
         # the normalized vector in the plane H1OH2 orthogonal to OH1
-        #print ('cross \n',np.cross(vector_OH1, vector_OH2))
         pH1 = np.cross(vector_OH1, np.cross(vector_OH1, vector_OH2))
 
         # the normalized vector in the plane H1OH2 orthogonal to H2O
@@ -145,17 +136,8 @@ class InterMolecularForce :
         vector_OH1_hat = vector_OH1/ np.linalg.norm(vector_OH1, axis=1).reshape(-1,1)
         vector_OH2_hat = vector_OH2 / np.linalg.norm(vector_OH2, axis=1).reshape(-1,1)
         dot_product = np.expand_dims (np.sum(vector_OH1_hat*vector_OH2_hat, axis=1), axis =1)
-        #print (oxygen)
-        #print ('unit vector OH1 \n',vector_OH1_hat)
-        #print ('unit vector OH2 \n',vector_OH2_hat)
-        #print ('dot \n',dot_product)
-        #print (np.linalg.norm(vector_OH1, axis=1).reshape(-1,1))
-        #print (np.arccos(np.minimum(1, dot_product)))
-        #dot_product = np.where(dot_product < 1, dot_product, dot_product-1e-5)
-        #print ('dot product \n', dot_product)
         angle = np.arccos(dot_product)
 
-        #angle = np.math.atan2(np.linalg.det([vector_OH1,vector_OH2]),np.dot(vector_OH1,vector_OH2))
 
         # compute forces
         bend_force_H1 = -self.k_tet*pH1*(angle - tet_eq_radi)/(np.linalg.norm(vector_OH1, axis=1).reshape(-1,1))
@@ -169,7 +151,6 @@ class InterMolecularForce :
         all_angle_bend_force[0::3] = bend_force_O
         all_angle_bend_force[1::3] = bend_force_H1
         all_angle_bend_force[2::3] = bend_force_H2
-        #print (all_angle_bend_force)
 
         return all_angle_bend_force
         
@@ -183,11 +164,9 @@ if __name__=="__main__":
     oh_len = 1
     box_len = 8
 
-    #lattice_object = LatticeConfig (intmolecdist, hoh_angle, oh_len, box_len)
-    #lattice_postate = lattice_object()
-    lattice_postate = np.random.randint(10, size=(6, 3))
+    lattice_object = LatticeConfig (intmolecdist, hoh_angle, oh_len, box_len)
+    lattice_postate = lattice_object()
 
-    print (lattice_postate)
     force_object = InterMolecularForce(r_eq=oh_len, k_b=1059.162, tet_eq=103, k_tet=75)
     spring_force = force_object (lattice_postate)
     
