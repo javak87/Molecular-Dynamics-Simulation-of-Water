@@ -42,13 +42,16 @@ class EwaldSummation :
         return total_f
     
     def _get_points_in_sphere(self):
-        radius = floor(self.k_cut * self.box_len / (2 * pi))
+        
         k_vec = np.empty((0,3), int)
-        for i in range(radius+1):
-            for j in range(radius+1):
-                for k in range(radius+1):
+        radius = self.k_cut * self.box_len / (2 * pi)
+        radius_i = floor(radius)
+        for i in range(-radius_i, radius_i+1):
+            for j in range(-radius_i, radius_i+1):
+                for k in range(-radius_i, radius_i+1):
                     if (( i * i + j * j + k * k)<= radius ** 2):
                         k_vec = np.append(k_vec,np.array([[i,j,k]]),axis=0)
+        k_vec = k_vec[~np.all(k_vec == 0, axis=1)]
         k_vec = k_vec * 2 * pi/self.box_len
         return k_vec
 
@@ -111,19 +114,26 @@ class EwaldSummation :
         charges = np.tile(np.array([self.O_charge,self.H_charge,self.H_charge]),num_mols) 
         ## array shape N * 1    N atoms
         r_vec = postate ## array shape N * 3
+        """
+        permutation = [0, 2, 1]
+        idx = np.empty_like(permutation)
+        idx[permutation] = np.arange(len(permutation))
+        r_vec = r_vec[:, idx]
+        """
         k_vec = self._get_points_in_sphere() ## array shape n * 3  x,y,z positive kvectors
         k_square = np.sum(k_vec ** 2, 1) ## array shape n * 1
-        k_square = np.tile(k_square, 4) ## array shape 4n*1 upper sphere 
-        k_vec_x = np.asarray(np.matmul(k_vec, np.matrix([[-1, 0, 0], [0, 1, 0], [0, 0, 1]])))
-        k_vec_y = np.asarray(np.matmul(k_vec, np.matrix([[1, 0, 0], [0, -1, 0], [0, 0, 1]])))
-        k_vec_xy = np.asarray(np.matmul(k_vec, np.matrix([[-1, 0, 0], [0, -1, 0], [0, 0, 1]])))
+        #k_square = np.tile(k_square, 4) ## array shape 4n*1 upper sphere 
+        #k_vec_x = np.asarray(np.matmul(k_vec, np.matrix([[-1, 0, 0], [0, 1, 0], [0, 0, 1]])))
+        #k_vec_y = np.asarray(np.matmul(k_vec, np.matrix([[1, 0, 0], [0, -1, 0], [0, 0, 1]])))
+        #k_vec_xy = np.asarray(np.matmul(k_vec, np.matrix([[-1, 0, 0], [0, -1, 0], [0, 0, 1]])))
 
-        k_vec = np.vstack((k_vec, k_vec_x, k_vec_y, k_vec_xy)) ## array shape 4n * 3  upper sphere kvectors
-        
+        #k_vec = np.vstack((k_vec, k_vec_x, k_vec_y, k_vec_xy)) ## array shape 4n * 3  upper sphere kvectors
+
+
         krs = np.matmul(k_vec, np.transpose(r_vec)) ## array shape 4n * N   dot product of k and r 
 
         sk_real = np.matmul(np.cos(krs), charges) ## array shape 4n * 1
-        # sk_img  = np.matmul(np.sin(krs), charges) ## array shape 4n * 1
+        sk_img  = np.matmul(np.sin(krs), charges) ## array shape 4n * 1
         # sk2 = sk_real ** 2 + sk_img ** 2  # arrayshape 4n * 1 structure factor square 
         
         # energy_l = prefac * np.nansum(sk2 * np.exp(-sigma ** 2 * k_square /2)/ k_square) 
@@ -132,12 +142,12 @@ class EwaldSummation :
         """
         #https://stackoverflow.com/questions/18522216/multiplying-across-in-a-numpy-array
         expsigma =  np.exp(-sigma ** 2 * k_square /2)/ k_square
-        expsigma[expsigma == -inf] = 0
-        expsigma[expsigma ==  inf] = 0
-        f_real = np.matmul(np.transpose(k_vec), (np.sin(krs) * sk_real[:,None]) * \
-                expsigma[:,None]) ## array shape 3*N 
+        #expsigma[expsigma == -inf] = 0
+        #expsigma[expsigma ==  inf] = 0
+        f_real = np.matmul(np.transpose(k_vec), \
+        (np.sin(krs) * sk_real[:,None]+np.cos(krs) * sk_img[:,None]) * expsigma[:,None]) ## array shape 3*N 
         
-        recip_f = charges[:,None] * np.transpose(f_real) * prefac * 2
+        recip_f = charges[:,None] * np.transpose(f_real) * prefac 
 
         return recip_f
     
@@ -153,8 +163,8 @@ if __name__=="__main__":
     O_charge = -0.834
     H_charge = 0.417
     epszero = 0.8987
-    k_cut = box_len
-    acc_p = 12
+    acc_p = 10
+    k_cut = 2 * acc_p / box_len
     print (postate)
     force_obj = EwaldSummation (O_charge, H_charge, epszero, box_len, sd_dev, k_cut, acc_p)
     force_ES = force_obj(postate)
