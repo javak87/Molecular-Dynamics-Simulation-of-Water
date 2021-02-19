@@ -14,7 +14,7 @@ class EwaldSummation :
     '''
 
     def __init__ (self, O_charge: float, H_charge: float, epszero: float, 
-                  box_len: float, sd_dev: float, k_cut: float, acc_p: int) :
+                  box_len: float, sd_dev: float, k_cut: float) :
 
         """
         Initializes the Ewald sum. parameters
@@ -42,18 +42,28 @@ class EwaldSummation :
         return total_f
     
     def _get_points_in_sphere(self):
-        
+        """
+        Get reciprocal lattice vectors k-vecs in the upper sphere and 
+        k-vecs in the below part can be mirrored by the upper ones, 
+        where k-vecs in the xy plane have been considered for following calculation.
+        """
         k_vec = np.empty((0,3), int)
         radius = self.k_cut * self.box_len / (2 * pi)
         radius_i = floor(radius)
-        for i in range(-radius_i, radius_i+1):
-            for j in range(-radius_i, radius_i+1):
-                for k in range(-radius_i, radius_i+1):
+        for i in range(0, radius_i+1):
+            for j in range(0, radius_i+1):
+                for k in range(0, radius_i+1):
                     if (( i * i + j * j + k * k)<= radius ** 2):
                         k_vec = np.append(k_vec,np.array([[i,j,k]]),axis=0)
+        k_vec_x = np.asarray(np.matmul(k_vec, np.matrix([[-1, 0, 0], [0, 1, 0], [0, 0, 1]])))
+        k_vec_y = np.asarray(np.matmul(k_vec, np.matrix([[1, 0, 0], [0, -1, 0], [0, 0, 1]])))
+        k_vec_xy = np.asarray(np.matmul(k_vec, np.matrix([[-1, 0, 0], [0, -1, 0], [0, 0, 1]])))
+        k_vec = np.vstack((k_vec, k_vec_x, k_vec_y, k_vec_xy)) 
         k_vec = k_vec[~np.all(k_vec == 0, axis=1)]
+        k_vec = np.unique(k_vec, axis=0)
+        k_vec_in_xy = k_vec[k_vec[:,2] == 0] * 2 * pi/self.box_len
         k_vec = k_vec * 2 * pi/self.box_len
-        return k_vec
+        return k_vec_in_xy, k_vec
 
     def real_force (self, postate) :
 
@@ -64,7 +74,7 @@ class EwaldSummation :
         images_object = GenerateImages (postate, self.bounds, self.box_len)
         periodic_images = images_object.expand_images()
 
-        print (periodic_images)
+        #print (periodic_images)
 
 
         # assign oxygen and Hydrogen charge to all atoms
@@ -105,49 +115,38 @@ class EwaldSummation :
         volume = self.volume
         sigma = self.sd_dev
         prefac = 1/(volume*epsilon) 
-        # we only compute the one half-space of k-vectors, replace 4 with 2. 
         
         """
-        Interaction Energy
+        Get atoms configuration
         """
         num_mols = int(postate.shape[0]/3)
         charges = np.tile(np.array([self.O_charge,self.H_charge,self.H_charge]),num_mols) 
-        ## array shape N * 1    N atoms
-        r_vec = postate ## array shape N * 3
-        """
-        permutation = [0, 2, 1]
-        idx = np.empty_like(permutation)
-        idx[permutation] = np.arange(len(permutation))
-        r_vec = r_vec[:, idx]
-        """
-        k_vec = self._get_points_in_sphere() ## array shape n * 3  x,y,z positive kvectors
-        k_square = np.sum(k_vec ** 2, 1) ## array shape n * 1
-        #k_square = np.tile(k_square, 4) ## array shape 4n*1 upper sphere 
-        #k_vec_x = np.asarray(np.matmul(k_vec, np.matrix([[-1, 0, 0], [0, 1, 0], [0, 0, 1]])))
-        #k_vec_y = np.asarray(np.matmul(k_vec, np.matrix([[1, 0, 0], [0, -1, 0], [0, 0, 1]])))
-        #k_vec_xy = np.asarray(np.matmul(k_vec, np.matrix([[-1, 0, 0], [0, -1, 0], [0, 0, 1]])))
+        r_vec = postate 
 
-        #k_vec = np.vstack((k_vec, k_vec_x, k_vec_y, k_vec_xy)) ## array shape 4n * 3  upper sphere kvectors
-
-
-        krs = np.matmul(k_vec, np.transpose(r_vec)) ## array shape 4n * N   dot product of k and r 
-
-        sk_real = np.matmul(np.cos(krs), charges) ## array shape 4n * 1
-        sk_img  = np.matmul(np.sin(krs), charges) ## array shape 4n * 1
-        # sk2 = sk_real ** 2 + sk_img ** 2  # arrayshape 4n * 1 structure factor square 
-        
-        # energy_l = prefac * np.nansum(sk2 * np.exp(-sigma ** 2 * k_square /2)/ k_square) 
         """
-        Interaction Forces
+        k-vecs calculation, k-vecs_in be calculated separately
         """
-        #https://stackoverflow.com/questions/18522216/multiplying-across-in-a-numpy-array
+        k_vec_in, k_vec = self._get_points_in_sphere() 
+        k_square_in = np.sum(k_vec_in ** 2, 1)
+        k_square = np.sum(k_vec ** 2, 1)
+        krs_in = np.matmul(k_vec_in, np.transpose(r_vec)) 
+        krs = np.matmul(k_vec, np.transpose(r_vec))
+        sk_real_in = np.matmul(np.cos(krs_in), charges) 
+        sk_img_in  = np.matmul(np.sin(krs_in), charges) 
+        sk_real = np.matmul(np.cos(krs), charges) 
+        sk_img  = np.matmul(np.sin(krs), charges) 
         expsigma =  np.exp(-sigma ** 2 * k_square /2)/ k_square
-        #expsigma[expsigma == -inf] = 0
-        #expsigma[expsigma ==  inf] = 0
-        f_real = np.matmul(np.transpose(k_vec), \
-        (np.sin(krs) * sk_real[:,None]+np.cos(krs) * sk_img[:,None]) * expsigma[:,None]) ## array shape 3*N 
+        expsigma_in =  np.exp(-sigma ** 2 * k_square_in /2)/ k_square_in
         
-        recip_f = charges[:,None] * np.transpose(f_real) * prefac 
+        f_real = np.matmul(np.transpose(k_vec), \
+        (np.sin(krs) * sk_real[:,None] - np.cos(krs) * sk_img[:,None]) * expsigma[:,None]) 
+        f_real_in = np.matmul(np.transpose(k_vec_in), \
+        (np.sin(krs_in) * sk_real_in[:,None] - np.cos(krs_in) * sk_img_in[:,None]) * expsigma_in[:,None])
+
+        """
+        we should substract one f_real_in from f_real, since we calculate it twice.
+        """ 
+        recip_f = prefac * charges[:,None] * (np.transpose(f_real) * 2 - np.transpose(f_real_in))
 
         return recip_f
     
@@ -163,12 +162,8 @@ if __name__=="__main__":
     O_charge = -0.834
     H_charge = 0.417
     epszero = 0.8987
-    acc_p = 10
+    acc_p = 15
     k_cut = 2 * acc_p / box_len
-    print (postate)
-    force_obj = EwaldSummation (O_charge, H_charge, epszero, box_len, sd_dev, k_cut, acc_p)
+    force_obj = EwaldSummation (O_charge, H_charge, epszero, box_len, sd_dev, k_cut)
     force_ES = force_obj(postate)
-    print (force_ES)
     
-
-        
