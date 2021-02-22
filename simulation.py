@@ -4,6 +4,7 @@ from lennard_jones import LennardJones
 from lattice_config import LatticeConfig
 from initial_vel import InitialVelocity
 from vibration_effect import InterMolecularForce
+from ewald_summation import EwaldSummation
 from Integrator import Integrator
 from FileOperation import FileOperation
 import h5py
@@ -18,7 +19,12 @@ class Simulation :
                         oh_len: float, box_len: float,
                         O_mass: float, H_mass : float,
                         Kb: float, temp: float, sigma: float,
-                        epsilon: float, r_cut: float, compmethod: str, k_b: float, tet_eq: float, k_tet: float, save_data_itr:int) :
+                        epsilon: float, r_cut: float, compmethod: str,
+                        k_b: float, tet_eq: float, k_tet: float,
+                        save_data_itr:int,
+                        O_charge : float,H_charge : float,
+                        epszero : float, sd_dev : float,
+                        k_cut : float, acc_p : float) :
                 
                 self.grid = grid
                 self.intmolecdist = intmolecdist
@@ -37,6 +43,16 @@ class Simulation :
                 self.k_tet = k_tet
                 self.k_b = k_b
                 self.save_data_itr = save_data_itr
+
+                self.O_charge = O_charge
+                self.H_charge = H_charge
+                self.epszero = epszero
+                self.box_len = box_len
+                self.sd_dev = sd_dev
+                self.k_cut = k_cut
+                self.acc_p = acc_p
+
+                
                 
 
 
@@ -69,10 +85,16 @@ class Simulation :
                 # create spring force object
                 sp_object = InterMolecularForce (self.oh_len, self.k_b, self.tet_eq, self.k_tet)
 
+                # create Coulomb force object
+                cl_object =EwaldSummation (self.O_charge, self.H_charge, self.epszero, 
+                self.box_len, self.sd_dev, self.k_cut)
+
                 # create Integrator object
                 integrator_object = Integrator (self.O_mass, self.H_mass)
 
                 bounds = np.array([self.box_len, self.box_len, self.box_len])
+
+                
 
 
                 for i in range (self.grid.shape[0]-1) :
@@ -81,12 +103,17 @@ class Simulation :
                         timespan = (self.grid [i], self.grid [i+1])
 
                         lj_force =lj_object (new_postate)
+                        
 
                         sp_force = sp_object(new_postate)
 
-                        force = sp_force + lj_force
+                        cl_force = cl_object (new_postate)
 
-                        new_postate, new_velocity = integrator_object (new_postate, new_velocity, force , lj_object, sp_object, timespan)
+                        force = cl_force  + sp_force + lj_force
+
+                        new_postate, new_velocity = integrator_object (new_postate, new_velocity, force , lj_object, sp_object, cl_object, timespan)
+
+                        
 
                         # Apply periodic boundary condition for water molecules
                         new_postate_obj = PeriodicBoundary (self.box_len, new_postate)

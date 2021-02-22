@@ -9,6 +9,7 @@ from lennard_jones import LennardJones
 from lattice_config import LatticeConfig
 from initial_vel import InitialVelocity
 from vibration_effect import InterMolecularForce
+from ewald_summation import EwaldSummation
 from Integrator import Integrator
 from FileOperation import FileOperation
 import h5py
@@ -44,7 +45,10 @@ else :
                     oh_len, box_len,
                     O_mass, H_mass,
                     Kb, temp, sigma,
-                    epsilon, r_cut, compmethod , k_b, tet_eq, k_tet, save_data_itr)
+                    epsilon, r_cut, compmethod , k_b, tet_eq, k_tet, save_data_itr,
+                    O_charge, H_charge,
+                    epszero, sd_dev,
+                    k_cut, acc_p)
     postate = sim ()
 
 # visulize the result
@@ -53,7 +57,7 @@ else :
     visual_result = viusl_obj()
 
 # save the last step of molecule's position
-f = open('solution_n_800.pckl', 'wb')
+f = open('solution_n_200.pckl', 'wb')
 pickle.dump(postate, f)
 f.close()
 

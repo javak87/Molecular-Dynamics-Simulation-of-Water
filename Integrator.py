@@ -32,13 +32,13 @@ class Integrator :
 
 
 
-    def __call__ (self, postate: np.ndarray, velocity: np.ndarray, force, lj_object, sp_object, timespan) :
+    def __call__ (self, postate: np.ndarray, velocity: np.ndarray, force, lj_object, sp_object, cl_object, timespan) :
 
         
-        return self.velocityverlet(postate, velocity, force , lj_object, sp_object, timespan)
+        return self.velocityverlet(postate, velocity, force , lj_object, sp_object, cl_object, timespan)
 
 
-    def velocityverlet (self, postate: np.ndarray, velocity: np.ndarray, force, lj_object, sp_object, timespan) :
+    def velocityverlet (self, postate: np.ndarray, velocity: np.ndarray, force, lj_object, sp_object, cl_object, timespan) :
         
         # create diagonal mass numpy array
         mass_matrix = np.zeros((postate.shape[0], postate.shape[0]), float)
@@ -61,10 +61,13 @@ class Integrator :
         momenta_half_step = diag_mass * velocity + (force * (timespan[1] - timespan[0]) / 2)
         position_full_step = postate + (timespan[1] - timespan[0]) * np.dot (inv(mass_matrix), momenta_half_step) 
 
+        
         # calculate forces
         lj_force = lj_object (position_full_step)
         spring_force = sp_object(position_full_step)
-        force = spring_force + lj_force
+        cl_force = cl_object (position_full_step)
+
+        force = cl_force  + spring_force + lj_force
 
         momenta_full_step = momenta_half_step + ( timespan[1] - timespan[0] ) * force / 2
 
@@ -123,6 +126,6 @@ if __name__=="__main__":
 
     force = lj_force + sp_force
 
-    new_pos, new_vel = integrator_object (new_postate, new_velocity, force , lj_object, sp_object, timespan)
+    new_pos, new_vel = integrator_object (new_postate, new_velocity, force , lj_object, sp_object, cl_force, timespan)
 
     print ('new position : \n', new_pos)
