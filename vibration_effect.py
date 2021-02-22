@@ -87,7 +87,6 @@ class InterMolecularForce :
         # Calculate second O-H bond force
         spring_force_H2 = -self.k_b* (dist_OH2-self.r_eq)[:, None]*vector_OH2_hat
 
-
         # Calculate imposed force to Oxyegene
         spring_force_O = -1*(spring_force_H1 + spring_force_H2)
 
@@ -141,6 +140,7 @@ class InterMolecularForce :
 
         # compute forces
         bend_force_H1 = -self.k_tet*pH1*(angle - tet_eq_radi)/(np.linalg.norm(vector_OH1, axis=1).reshape(-1,1))
+        
 
         bend_force_H2 = -self.k_tet*pH2*(angle - tet_eq_radi)/(np.linalg.norm(vector_OH2, axis=1).reshape(-1,1))
 

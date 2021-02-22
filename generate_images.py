@@ -10,7 +10,6 @@ def _gen_relevant_images(x, bounds, distance_upper_bound):
                           np.floor(x / bounds) * bounds, 0.0)
     #m = len(x)
     m= x.shape[0]
-    
     xs_to_try = [real_x]
     for i in range(m):
         if bounds[i] > 0.0:
@@ -60,9 +59,9 @@ class GenerateImages :
 
 if __name__=="__main__":
 
-    bounds = np.array([10, 10, 10])
+    bounds = np.array([1, 1, 1])
 
-    postate = np.random.randint(low=1, high=10, size = (100,3))
+    postate = np.random.randint(low=1, high=10, size = (3,3))
 
     P_ch = np.array ([[-0.834], [0.417], [0.417]])
 
@@ -71,12 +70,13 @@ if __name__=="__main__":
     point_charge[1::3] = P_ch[1]
     point_charge[2::3] = P_ch[2]
 
-    print (point_charge)
+    print ('--------------------')
+    print (np.array (_gen_relevant_images(postate[2], bounds, 2)))
 
     image_obj = GenerateImages(postate, bounds, 10)
     images = image_obj.expand_images()
+    #print ('all images is \n', images)
 
-    print (images.shape)
     charge_array = np.zeros((images.shape[0],1))
 
     #print (charge_array)
@@ -102,6 +102,6 @@ if __name__=="__main__":
     #print (force)
     #print ('force \n', force[0])
     x= force.sum(axis=1)
-    print (x.sum(axis=0))
+    #print (x.sum(axis=0))
 
     
