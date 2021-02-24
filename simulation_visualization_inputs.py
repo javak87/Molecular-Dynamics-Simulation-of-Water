@@ -1,4 +1,5 @@
 import numpy as np
+from get_recip_kvecs import *
 '''
 These are the input for molecular dynamic of water.
 '''
@@ -35,10 +36,12 @@ H_charge = 0.417
 epszero = 0.8987
 acc_p = 15
 k_cut = 2 * acc_p / box_len
+# recip space k-vectors 
+k_vec_in_xy, k_vec, k_square_in_xy, k_square = get_recip_kvecs(k_cut, box_len)
 
 
 # Time Integration parameters (femtoseconds)
-timesteps = 2000
+timesteps = 1000
 timespan= (0, 10)
 grid = np.linspace (timespan[0], timespan[1], timesteps)
 

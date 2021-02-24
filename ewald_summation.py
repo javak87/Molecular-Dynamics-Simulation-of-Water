@@ -3,7 +3,8 @@ from scipy import special
 from generate_images import GenerateImages
 from lattice_config import LatticeConfig
 from numpy import inf
-from math import pi, floor
+from get_recip_kvecs import *
+
 
 
 class EwaldSummation :
@@ -14,7 +15,12 @@ class EwaldSummation :
     '''
 
     def __init__ (self, O_charge: float, H_charge: float, epszero: float, 
-                  box_len: float, sd_dev: float, k_cut: float) :
+                  box_len: float, sd_dev: float, 
+                  #k_cut: float, 
+                  k_vec_in_xy: np.ndarray, 
+                  k_vec: np.ndarray, 
+                  k_square_in_xy: np.ndarray, 
+                  k_square: np.ndarray):
 
         """
         Initializes the Ewald sum. parameters
@@ -27,7 +33,11 @@ class EwaldSummation :
         self.H_charge = H_charge
         self.epszero = epszero
         self.sd_dev = sd_dev
-        self.k_cut = k_cut
+        self.k_vec_in_xy = k_vec_in_xy
+        self.k_vec = k_vec
+        self.k_square_in_xy = k_square_in_xy
+        self.k_square = k_square
+        
         self.bounds = np.array ([self.box_len, self.box_len, self.box_len])             
     
     def __call__ (self, postate) :
@@ -40,30 +50,6 @@ class EwaldSummation :
         total_f = real_f + recip_f
         return total_f
     
-    def _get_points_in_sphere(self):
-        """
-        Get reciprocal lattice vectors k-vecs in the upper sphere and 
-        k-vecs in the below part can be mirrored by the upper ones, 
-        where k-vecs in the xy plane have been considered for following calculation.
-        """
-        k_vec = np.empty((0,3), int)
-        radius = self.k_cut * self.box_len / (2 * pi)
-        radius_i = floor(radius)
-        for i in range(0, radius_i+1):
-            for j in range(0, radius_i+1):
-                for k in range(0, radius_i+1):
-                    if (( i * i + j * j + k * k)<= radius ** 2):
-                        k_vec = np.append(k_vec,np.array([[i,j,k]]),axis=0)
-        k_vec_x = np.asarray(np.matmul(k_vec, np.matrix([[-1, 0, 0], [0, 1, 0], [0, 0, 1]])))
-        k_vec_y = np.asarray(np.matmul(k_vec, np.matrix([[1, 0, 0], [0, -1, 0], [0, 0, 1]])))
-        k_vec_xy = np.asarray(np.matmul(k_vec, np.matrix([[-1, 0, 0], [0, -1, 0], [0, 0, 1]])))
-        k_vec = np.vstack((k_vec, k_vec_x, k_vec_y, k_vec_xy)) 
-        k_vec = k_vec[~np.all(k_vec == 0, axis=1)]
-        k_vec = np.unique(k_vec, axis=0)
-        k_vec_in_xy = k_vec[k_vec[:,2] == 0] * 2 * pi/self.box_len
-        k_vec = k_vec * 2 * pi/self.box_len
-        return k_vec_in_xy, k_vec
-
     def real_force (self, postate) :
 
         '''
@@ -114,7 +100,10 @@ class EwaldSummation :
         volume = self.volume
         sigma = self.sd_dev
         prefac = 1/(volume*epsilon) 
-        
+        k_vec = self.k_vec
+        k_vec_in = self.k_vec_in_xy
+        k_square_in = self.k_square_in_xy
+        k_square = self.k_square
         """
         Get atoms configuration
         """
@@ -122,12 +111,6 @@ class EwaldSummation :
         charges = np.tile(np.array([self.O_charge,self.H_charge,self.H_charge]),num_mols) 
         r_vec = postate 
 
-        """
-        k-vecs calculation, k-vecs_in be calculated separately
-        """
-        k_vec_in, k_vec = self._get_points_in_sphere() 
-        k_square_in = np.sum(k_vec_in ** 2, 1)
-        k_square = np.sum(k_vec ** 2, 1)
         krs_in = np.matmul(k_vec_in, np.transpose(r_vec)) 
         krs = np.matmul(k_vec, np.transpose(r_vec))
         sk_real_in = np.matmul(np.cos(krs_in), charges) 
@@ -163,7 +146,8 @@ if __name__=="__main__":
     epszero = 0.8987
     acc_p = 15
     k_cut = 2 * acc_p / box_len
-    force_obj = EwaldSummation (O_charge, H_charge, epszero, box_len, sd_dev, k_cut)
+    k_vec_in_xy, k_vec, k_square_in_xy, k_square = get_recip_kvecs(k_cut, box_len)
+    force_obj = EwaldSummation (O_charge, H_charge, epszero, box_len, sd_dev, k_vec_in_xy, k_vec, k_square_in_xy, k_square)
     force_ES = force_obj(postate)
     print (force_ES.sum(0))
     
