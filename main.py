@@ -48,7 +48,7 @@ else :
                     epsilon, r_cut, compmethod , k_b, tet_eq, k_tet, save_data_itr,
                     O_charge, H_charge,
                     epszero, sd_dev,
-                    k_cut, acc_p)
+                    k_vec_in_xy, k_vec, k_square_in_xy, k_square)
     postate = sim ()
 
 # visulize the result

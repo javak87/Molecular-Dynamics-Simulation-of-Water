@@ -24,7 +24,10 @@ class Simulation :
                         save_data_itr:int,
                         O_charge : float,H_charge : float,
                         epszero : float, sd_dev : float,
-                        k_cut : float, acc_p : float) :
+                        k_vec_in_xy : np.ndarray,
+                        k_vec : np.ndarray,
+                        k_square_in_xy : np.ndarray,
+                        k_square : np.ndarray) :
                 
                 self.grid = grid
                 self.intmolecdist = intmolecdist
@@ -49,8 +52,10 @@ class Simulation :
                 self.epszero = epszero
                 self.box_len = box_len
                 self.sd_dev = sd_dev
-                self.k_cut = k_cut
-                self.acc_p = acc_p
+                self.k_vec_in_xy = k_vec_in_xy
+                self.k_vec = k_vec
+                self.k_square_in_xy = k_square_in_xy
+                self.k_square = k_square
 
                 
                 
@@ -87,7 +92,10 @@ class Simulation :
 
                 # create Coulomb force object
                 cl_object =EwaldSummation (self.O_charge, self.H_charge, self.epszero, 
-                self.box_len, self.sd_dev, self.k_cut)
+                self.box_len, self.sd_dev, self.k_vec_in_xy, self.k_vec, self.k_square_in_xy, self.k_square)
+                
+                
+                
 
                 # create Integrator object
                 integrator_object = Integrator (self.O_mass, self.H_mass)

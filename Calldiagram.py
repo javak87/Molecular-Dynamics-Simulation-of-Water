@@ -17,6 +17,7 @@ from apply_periodic_boundary import PeriodicBoundary
 import pickle
 
 from visualization import Visualization
+from get_recip_kvecs import *
 from simulation import Simulation
 from simulation_visualization_inputs import *
 import cProfile, pstats
@@ -35,7 +36,8 @@ def naive_simulation():
                     epsilon, r_cut, compmethod , k_b, tet_eq, k_tet, save_data_itr,
                     O_charge, H_charge,
                     epszero, sd_dev,
-                    k_cut, acc_p)
+                    #k_cut, acc_p,
+                    k_vec_in_xy, k_vec, k_square_in_xy, k_square)
 
     postate = sim()
     return postate
@@ -50,7 +52,8 @@ def pbc_simulation():
                     epsilon, r_cut, compmethod , k_b, tet_eq, k_tet, save_data_itr,
                     O_charge, H_charge,
                     epszero, sd_dev,
-                    k_cut, acc_p)
+                    #k_cut, acc_p,
+                    k_vec_in_xy, k_vec, k_square_in_xy, k_square)
 
     postate = sim()
     return postate
@@ -65,7 +68,8 @@ def cellink_simulation():
                     epsilon, r_cut, compmethod , k_b, tet_eq, k_tet, save_data_itr,
                     O_charge, H_charge,
                     epszero, sd_dev,
-                    k_cut, acc_p)
+                    #k_cut, acc_p,
+                    k_vec_in_xy, k_vec, k_square_in_xy, k_square)
 
     postate = sim()
     return postate
@@ -84,7 +88,7 @@ if __name__== "__main__":
     stats = pstats.Stats(profiler).sort_stats('cumtime')
     stats.print_stats()
     stats.dump_stats('./profiler-naive-data')
-
+    """
     #Call diagram for PBC
     graphviz = GraphvizOutput()
     graphviz.output_file = "pbc.png"
@@ -110,4 +114,4 @@ if __name__== "__main__":
     stats = pstats.Stats(profiler).sort_stats('cumtime')
     stats.print_stats()
     stats.dump_stats('./profiler-cellink-data')
-    
+    """

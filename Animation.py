@@ -142,10 +142,7 @@ if __name__ == "__main__":
     ax.set_ylabel("Y - position")
     ax.set_zlabel("Z - position")
 
-    # now the nice slicing of the positional array comes into play;
-    # the axes of the 3D-plot are scaled based on the maximum and minimum x, y and z - coordinates of all timesteps,
-    # meaning that the -simulated molecules will always stay in the animation box
-    # (not to be confused with the simulation box !)
+    # now the slicing of the positional array comes into play;
 
     # as an example:
     # x_position_range = (np.amax(position_array[:][:][..., 0]), np.amin(position_array[:][:][..., 0]))
