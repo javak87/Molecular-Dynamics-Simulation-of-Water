@@ -46,7 +46,8 @@ class LatticeConfig :
         lattice_postate = np.zeros((1, 3))
         lower_bond = 2
         upper_bond = math.floor (self.box_len)
-        step_size = math.ceil (2*distance_top_view + self.intmolecdist)
+        #step_size = math.ceil (2*distance_top_view + self.intmolecdist)
+        step_size = math.ceil (self.intmolecdist)
         for i in range (lower_bond, upper_bond, step_size) :
             for j in range (lower_bond, upper_bond, step_size) :
                 for k in range (lower_bond, upper_bond, step_size) :
@@ -62,11 +63,11 @@ class LatticeConfig :
 if __name__=="__main__":
 
 
-    intmolecdist = 0.31
+    intmolecdist = 1.5
     hoh_angle = 103
     oh_len = 0.97
-    box_len = 30
+    box_len = 10
 
     lattice_object = LatticeConfig (intmolecdist, hoh_angle, oh_len, box_len)
     lattice_postate = lattice_object()
-    print (lattice_postate[3])
+    print (lattice_postate)

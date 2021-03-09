@@ -28,7 +28,7 @@ def benchmark():
 
     ex_time = []
     molecule_number = []
-    box = [25,30]
+    box = [16,20, 25]
     box_len = box[0]
     r_cut = 2.5*sigma
     
@@ -60,12 +60,16 @@ def benchmark():
             # Simulte and the visulize the result
 
             else :
+
                 
                 sim =Simulation (grid, intmolecdist, hoh_angle,
                                 oh_len, box_len,
                                 O_mass, H_mass,
                                 Kb, temp, sigma,
-                                epsilon, r_cut, compmethod , k_b, tet_eq, k_tet, save_data_itr)
+                                epsilon, r_cut, compmethod , k_b, tet_eq, k_tet, save_data_itr,
+                                O_charge, H_charge,
+                                epszero, sd_dev,
+                                k_cut, acc_p)
                 postate = sim ()
                 
                 #profiler = cProfile.Profile()
@@ -112,3 +116,21 @@ def benchmark():
 
 if __name__=="__main__":
     benchmark()
+
+
+    O2_Count = np.array([64, 125, 216, 343])
+    consumed_time_naive = np.array ([189, 602, 1625, 3930])
+    consumed_time_linked_cell = np.array ([207, 651, 1742, 4115])
+    consumed_time_PD_Linked_cell = np.array ([265, 662, 1747, 4103])
+
+    # plot Convergence Analysis
+    fig, ax = plt.subplots()
+    fig.suptitle("Consistency Analysis", fontsize=20)
+
+    ax.set_xlabel('log (delta T)', fontsize=15)
+    ax.set_ylabel('log (Error)', fontsize=15)
+
+    ax.scatter(np.log(deltaT), np.log (error), marker="o", s=100, color='blue')
+    ax.plot (np.log(deltaT), np.log (deltaT**2)+2.55, color='red', label='y=2*x + c')
+    plt.legend(loc="lower right")
+    plt.legend(prop={"size":16})

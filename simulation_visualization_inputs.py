@@ -8,7 +8,7 @@ Simulation Parameters :
 '''
 # position Initialization parameters
 box_len=10 # Angstroms
-intmolecdist = 1.5 # Angstroms 1.5 for water
+intmolecdist = 4 # Angstroms 1.5 for water
 
 # velocity Initialization parameters
 H_mass = 1.00794
@@ -38,12 +38,12 @@ k_cut = 2 * acc_p / box_len
 
 
 # Time Integration parameters (femtoseconds)
-timesteps = 2000
+timesteps = 1000
 timespan= (0, 10)
 grid = np.linspace (timespan[0], timespan[1], timesteps)
 
 # Iteration period for saving data into hdf5 files
-save_data_itr = 1
+save_data_itr = 20
 
 '''
 visualization parameters :
@@ -52,4 +52,4 @@ hdf5_file_name = "data.hdf5"
 x_upper = 10
 y_upper = 10
 z_upper = 10
-update_interval_animation = 1
+update_interval_animation = 20

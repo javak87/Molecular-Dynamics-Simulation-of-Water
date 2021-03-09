@@ -16,6 +16,7 @@ import h5py
 import sys
 from apply_periodic_boundary import PeriodicBoundary
 import pickle
+import time
 
 from visualization import Visualization
 from simulation import Simulation
@@ -28,7 +29,7 @@ print ('------------\n')
 print ('You want to visualize the result stored in the hdf5 file or want to simulate the water molecules and after that see the visualization. \n')
 print ('if you want to simulate water molecules, this process might the time-consuming. \n')
 print ('------------\n')
-
+start = time.time()
 #vis_or_sim = input ('Please insert "vis" for visualization and insert "sim" for simulation : \n')
 vis_or_sim = 'sim'
 
@@ -50,17 +51,19 @@ else :
                     epszero, sd_dev,
                     k_cut, acc_p)
     postate = sim ()
-
+    #print ('number of O2 atoms',postate.shape[0]/3)
 # visulize the result
 
     viusl_obj = Visualization (timesteps, update_interval_animation, save_data_itr, hdf5_file_name, x_upper, y_upper, z_upper)
     visual_result = viusl_obj()
 
+end = time.time()
 # save the last step of molecule's position
 f = open('solution_n_200.pckl', 'wb')
 pickle.dump(postate, f)
 f.close()
 
 print ('The package runs successfully\n')
+print ('consumed time is :', end-start)
 
 

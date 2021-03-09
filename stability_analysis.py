@@ -6,7 +6,7 @@ from lennard_jones import LennardJones
 from lattice_config import LatticeConfig
 from initial_vel import InitialVelocity
 from vibration_effect import InterMolecularForce
-from long_range_initer import CoulombInteraction
+#from long_range_initer import CoulombInteraction
 from Integrator import Integrator
 from FileOperation import FileOperation as FileIO
 import h5py
@@ -133,7 +133,7 @@ def error_analysis () :
     f.close()
 
     f = open('solution_n_200.pckl', 'rb')
-    postate_solution_n_170 = pickle.load(f)
+    postate_solution_n_200 = pickle.load(f)
     f.close()
 
     error_n_3500 = np.linalg.norm(postate_true_solution-postate_solution_n_3500)
@@ -147,10 +147,10 @@ def error_analysis () :
 
     error_n_512 = np.linalg.norm(postate_true_solution-postate_solution_n_512)
     error_n_256 = np.linalg.norm(postate_true_solution-postate_solution_n_256)
-    error_n_170 = np.linalg.norm(postate_true_solution-postate_solution_n_170)
+    error_n_200 = np.linalg.norm(postate_true_solution-postate_solution_n_200)
 
-    error = np.array([error_n_3500, error_n_3000, error_n_2048, error_n_1500, error_n_1024, error_n_800, error_n_512, error_n_256, error_n_170])
-    deltaT = np.array ([1/3500, 1/3000, 1/2048, 1/1500, 1/1024, 1/800, 1/512, 1/256, 1/200])
+    error = np.array([error_n_3500, error_n_3000, error_n_2048, error_n_1500, error_n_1024, error_n_800, error_n_512, error_n_256])
+    deltaT = np.array ([1/3500, 1/3000, 1/2048, 1/1500, 1/1024, 1/800, 1/512, 1/256])
 
     # plot Convergence Analysis
     fig, ax = plt.subplots()
@@ -159,16 +159,17 @@ def error_analysis () :
     ax.set_xlabel('log (delta T)', fontsize=15)
     ax.set_ylabel('log (Error)', fontsize=15)
 
-    ax.scatter(np.log (error), np.log(deltaT), marker="o", s=100, color='blue', label='Log-Log')
-    #ax.scatter(np.log (deltaT), 0.5*np.log(deltaT), marker="o", s=100, color='red', label='semi')
-    #ax.scatter(np.log(deltaT), 0.5*np.log(deltaT), marker="o", s=100, color='blue')
-    #ax.plot(np.log(deltaT), 2*np.log(deltaT), 'r--')
-    #ax.set_xlim([-1e-6, 5e-4])
+    ax.scatter(np.log(deltaT), np.log (error), marker="o", s=100, color='blue')
+    ax.plot (np.log(deltaT), np.log (deltaT**2)+2.55, color='red', label='y=2*x + c')
+    plt.legend(loc="lower right")
+    plt.legend(prop={"size":16})
+
+    #ax.plot([-8], [-9], 'o')
+    #ax.annotate('Consistency Order', xy=(-8, -9), xytext=(-7.5, -10), arrowprops=dict(facecolor='black', shrink=0.05))
 
     plt.xticks(size = 12)
     plt.yticks(size = 12)
     plt.show()
-
 
     return error, deltaT
 

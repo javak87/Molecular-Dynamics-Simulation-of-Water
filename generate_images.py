@@ -63,45 +63,11 @@ if __name__=="__main__":
 
     postate = np.random.randint(low=1, high=10, size = (3,3))
 
-    P_ch = np.array ([[-0.834], [0.417], [0.417]])
-
-    point_charge = np.zeros((postate.shape[0],1))
-    point_charge[0::3] = P_ch[0]
-    point_charge[1::3] = P_ch[1]
-    point_charge[2::3] = P_ch[2]
 
     print ('--------------------')
     print (np.array (_gen_relevant_images(postate[2], bounds, 2)))
 
     image_obj = GenerateImages(postate, bounds, 10)
     images = image_obj.expand_images()
-    #print ('all images is \n', images)
-
-    charge_array = np.zeros((images.shape[0],1))
-
-    #print (charge_array)
-    charge_array[0:int (images.shape[0]/3)] = P_ch[0]
-    charge_array[int (images.shape[0]/3):int (2*images.shape[0]/3)] = P_ch[1]
-    charge_array[int (2*images.shape[0]/3):int (images.shape[0])] = P_ch[2]
-
-    #print (charge_array)
-
-    r_vector =  postate[:, np.newaxis] - images[np.newaxis, :]
-    #print(r_vector.shape)
-
-    charges = point_charge[:, np.newaxis]*charge_array[np.newaxis, :]
-
-    #print(charges.shape)
-
-
-    sq_dist = r_vector**2
-    norm_vector = np.sqrt (np.sum (sq_dist.T, axis=0).T.reshape(sq_dist.shape[0], sq_dist.shape[1], 1))
-
-    #print (vector)
-    force = charges*r_vector
-    #print (force)
-    #print ('force \n', force[0])
-    x= force.sum(axis=1)
-    #print (x.sum(axis=0))
-
+    print ('all images is \n', images)
     

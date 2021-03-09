@@ -28,7 +28,8 @@ class EwaldSummation :
         self.epszero = epszero
         self.sd_dev = sd_dev
         self.k_cut = k_cut
-        self.bounds = np.array ([self.box_len, self.box_len, self.box_len])             
+        x = self.box_len-1
+        self.bounds = np.array ([x, x, x])             
     
     def __call__ (self, postate) :
 
@@ -37,7 +38,7 @@ class EwaldSummation :
         '''
         real_f = self.real_force(postate)
         recip_f = self.recip_force(postate)
-        total_f = real_f + recip_f
+        total_f =  recip_f + real_f
         return total_f
     
     def _get_points_in_sphere(self):
@@ -73,7 +74,7 @@ class EwaldSummation :
         images_object = GenerateImages (postate, self.bounds, self.box_len)
         periodic_images = images_object.expand_images()
 
-        #print (periodic_images)
+        #print ('periodic', periodic_images)
 
 
         # assign oxygen and Hydrogen charge to all atoms
@@ -82,6 +83,8 @@ class EwaldSummation :
         point_charge[1::3] = self.H_charge
         point_charge[2::3] = self.H_charge
         
+        #print ('shape is \n', periodic_images.shape[0])
+        #print ('shape state is \n', postate.shape[0])
         charge_array = np.repeat(point_charge, 27).reshape (periodic_images.shape[0],1)
 
         charges = point_charge[:, np.newaxis]*charge_array[np.newaxis, :]
@@ -165,5 +168,5 @@ if __name__=="__main__":
     k_cut = 2 * acc_p / box_len
     force_obj = EwaldSummation (O_charge, H_charge, epszero, box_len, sd_dev, k_cut)
     force_ES = force_obj(postate)
-    print (force_ES.sum(0))
+    print (force_ES)
     

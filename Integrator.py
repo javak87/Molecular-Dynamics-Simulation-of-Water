@@ -67,7 +67,7 @@ class Integrator :
         spring_force = sp_object(position_full_step)
         cl_force = cl_object (position_full_step)
 
-        force = cl_force  + spring_force + lj_force
+        force = lj_force + spring_force + cl_force
 
         momenta_full_step = momenta_half_step + ( timespan[1] - timespan[0] ) * force / 2
 
@@ -124,7 +124,7 @@ if __name__=="__main__":
 
     sp_force = sp_object(new_postate)
 
-    force = lj_force + sp_force
+    force = lj_force
 
     new_pos, new_vel = integrator_object (new_postate, new_velocity, force , lj_object, sp_object, cl_force, timespan)
 

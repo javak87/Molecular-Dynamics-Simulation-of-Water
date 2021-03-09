@@ -69,7 +69,8 @@ class LennardJones:
 
         # compute force between each two pairs
         diff_postate = postate[np.newaxis, :] - postate[:, np.newaxis]
-        force = np.einsum('ijk,ij->ik', diff_postate, 24*self.sigma*(self.epsilon**6)*(1-2*((self.sigma/dists)**6))/dists**8)
+        force = np.einsum('ijk,ij->ik', diff_postate, 
+                        24*self.epsilon*(self.sigma**6)*(1-2*((self.sigma/dists)**6))/dists**8)
         
         # add zero rows to force numpy array instead of hydrogene atoms.
         # because lennard jones is only valid for oxyegene, lennard jones force for hydrogenes is zero
@@ -115,7 +116,7 @@ class LennardJones:
 
             # Compute forces
             diff_postate = postate[i,:][np.newaxis, :] - effective_state[:, np.newaxis]              
-            force = np.einsum('ijk, ij->jk', diff_postate, 24*self.sigma*(self.epsilon**6)*(1-2*((self.sigma/dists)**6))/dists**8)
+            force = np.einsum('ijk, ij->jk', diff_postate, 24*self.epsilon*(self.sigma**6)*(1-2*((self.sigma/dists)**6))/dists**8)
 
             # Append current force to all force array
             all_force = np.vstack((all_force, force))
@@ -154,7 +155,7 @@ class LennardJones:
 
             # Compute forces
             diff_postate = postate[i,:][np.newaxis, :] - effective_state[:, np.newaxis]              
-            force = np.einsum('ijk, ij->jk', diff_postate, 24*self.sigma*(self.epsilon**6)*(1-2*((self.sigma/dists)**6))/dists**8)
+            force = np.einsum('ijk, ij->jk', diff_postate, 24*self.epsilon*(self.sigma**6)*(1-2*((self.sigma/dists)**6))/dists**8)
 
             # Append current force to all force array
             all_force = np.vstack((all_force, force))
@@ -190,7 +191,7 @@ if __name__=="__main__":
     
 
     start1 = time.time()
-    model = LennardJones(sigma, epsilon, 'Cellink', r_cut, box_len)
+    model = LennardJones(sigma, epsilon, 'Naive', r_cut, box_len)
     result = model (postate)
     #print (result)
     end1 = time.time()
